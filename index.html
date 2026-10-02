@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>学園祭シフト管理</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f7fb;color:#222}
+header{background:#4f46e5;color:white;padding:20px 16px;position:sticky;top:0;z-index:10}
+h1{margin:0;font-size:22px}.sub{opacity:.85;font-size:13px;margin-top:4px}
+main{max-width:1100px;margin:auto;padding:16px}
+.card{background:white;border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 10px #0000000d}
+h2{font-size:18px;margin:0 0 12px}
+.row{display:flex;gap:8px;flex-wrap:wrap}input,select,button{font:inherit;border-radius:10px;padding:10px;border:1px solid #d7dbe7}
+input,select{background:white;min-width:0;flex:1}button{border:0;background:#4f46e5;color:white;font-weight:600;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}button.secondary{background:#eef0ff;color:#3730a3}button.danger{background:#ef4444}
+.tabs{display:flex;gap:8px;overflow:auto;margin-bottom:16px}.tabs button{white-space:nowrap}
+.tab{display:none}.tab.active{display:block}
+.notice{padding:12px;border-radius:10px;background:#fff7ed;color:#9a3412;margin-top:10px}
+.ok{background:#ecfdf5;color:#047857}
+table{width:100%;border-collapse:collapse;min-width:760px}th,td{border:1px solid #e5e7eb;padding:8px;text-align:center}th{background:#f3f4f6;position:sticky;top:70px}.name{text-align:left;font-weight:600;white-space:nowrap}
+.shift{background:#e0e7ff;color:#3730a3;border-radius:8px;padding:6px;font-size:12px;line-height:1.3}
+.scroll{overflow:auto}
+.person{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding:10px 0}
+.person:last-child{border-bottom:0}.muted{color:#6b7280;font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{background:#f8fafc;padding:14px;border-radius:12px}.num{font-size:24px;font-weight:700}
+@media(max-width:600px){main{padding:10px}.stats{grid-template-columns:1fr 1fr}.card{padding:13px}}
+</style>
+</head>
+<body>
+<header><h1>🎪 学園祭シフト管理</h1><div class="sub">スマホ対応・ブラウザだけで使える簡易版</div></header>
+<main>
+<div class="tabs">
+<button type="button" data-tab="dashboard">📊 シフト表</button>
+<button type="button" data-tab="members">👥 メンバー</button>
+<button type="button" data-tab="shifts">➕ シフト登録</button>
+<button type="button" data-tab="settings">⚙️ 設定</button>
+</div>
+
+<section id="dashboard" class="tab active">
+<div class="card"><h2>今日の状況</h2><div class="stats">
+<div class="stat"><div class="muted">メンバー</div><div class="num" id="memberCount">0</div></div>
+<div class="stat"><div class="muted">登録シフト</div><div class="num" id="shiftCount">0</div></div>
+<div class="stat"><div class="muted">不足時間帯</div><div class="num" id="shortageCount">0</div></div>
+</div><div id="alerts"></div></div>
+<div class="card"><h2>シフト表</h2><div class="scroll"><table><thead><tr id="timeHead"></tr></thead><tbody id="schedule"></tbody></table></div></div>
+</section>
+
+<section id="members" class="tab">
+<div class="card"><h2>メンバー追加</h2><div class="row"><input id="memberName" placeholder="名前"><button onclick="addMember()">追加</button></div></div>
+<div class="card"><h2>メンバー一覧</h2><div id="memberList"></div></div>
+</section>
+
+<section id="shifts" class="tab">
+<div class="card"><h2>シフトを登録</h2>
+<div class="row"><select id="shiftMember"></select><select id="shiftRole"></select></div>
+<div class="row" style="margin-top:8px"><select id="shiftTime"></select><button onclick="addShift()">登録</button></div>
+<p class="muted">※ 同じ人・同じ時間帯の重複登録はできません。</p>
+</div>
+<div class="card"><h2>登録済みシフト</h2><div id="shiftList"></div></div>
+</section>
+
+<section id="settings" class="tab">
+<div class="card"><h2>出店設定</h2>
+<div class="row"><input id="festivalName" placeholder="出店名"><input id="date" type="date"></div>
+<div class="row" style="margin-top:8px"><input id="start" type="time"><input id="end" type="time"><button onclick="saveSettings()">保存</button></div>
+</div>
+<div class="card"><h2>担当・必要人数</h2>
+<div id="roleList"></div>
+<div class="row" style="margin-top:10px"><input id="newRole" placeholder="例：呼び込み"><input id="newNeed" type="number" min="0" value="1" style="max-width:100px"><button onclick="addRole()">追加</button></div>
+</div>
+<div class="card"><button class="danger" onclick="resetAll()">データをすべて削除</button></div>
+</section>
+</main>
+
+<script>
+const KEY="gakusai_shift_v1";
+let data=JSON.parse(localStorage.getItem(KEY)||"null")||{
+name:"学園祭 出店",date:"",start:"09:00",end:"17:00",
+roles:[{name:"調理",need:2},{name:"会計",need:2},{name:"接客",need:2},{name:"呼び込み",need:1}],
+members:[],shifts:[]
+};
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
+function times(){
+ let a=[],[h,m]=data.start.split(":").map(Number),[eh,em]=data.end.split(":").map(Number);
+ let cur=h*60+m,end=eh*60+em;
+ while(cur<end){let n=cur+60;a.push(String(Math.floor(cur/60)).padStart(2,"0")+":"+String(cur%60).padStart(2,"0")+"–"+String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0"));cur=n}return a;
+}
+function showTab(id){
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  const target=document.getElementById(id);
+  if(target) target.classList.add("active");
+  document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("secondary",b.dataset.tab===id));
+}
+document.querySelectorAll(".tabs button").forEach(btn=>{
+  btn.addEventListener("click",()=>showTab(btn.dataset.tab));
+  btn.addEventListener("touchend",e=>{e.preventDefault();showTab(btn.dataset.tab);},{passive:false});
+});
+function addMember(){let x=document.getElementById("memberName").value.trim();if(!x)return;data.members.push({id:Date.now(),name:x});document.getElementById("memberName").value="";save()}
+function removeMember(id){data.members=data.members.filter(x=>x.id!==id);data.shifts=data.shifts.filter(x=>x.memberId!==id);save()}
+function addRole(){let n=document.getElementById("newRole").value.trim(),need=Number(document.getElementById("newNeed").value)||0;if(!n)return;data.roles.push({name:n,need});document.getElementById("newRole").value="";save()}
+function removeRole(i){data.roles.splice(i,1);data.shifts=data.shifts.filter(s=>s.role!==data.roles[i]?.name);save()}
+function addShift(){let m=Number(document.getElementById("shiftMember").value),role=document.getElementById("shiftRole").value,time=document.getElementById("shiftTime").value;if(!m||!role||!time)return;if(data.shifts.some(s=>s.memberId===m&&s.time===time)){alert("この人はその時間帯にすでに登録されています。");return}data.shifts.push({id:Date.now(),memberId:m,role,time});save()}
+function removeShift(id){data.shifts=data.shifts.filter(s=>s.id!==id);save()}
+function saveSettings(){data.name=document.getElementById("festivalName").value||"学園祭 出店";data.date=document.getElementById("date").value;data.start=document.getElementById("start").value||"09:00";data.end=document.getElementById("end").value||"17:00";save()}
+function resetAll(){if(confirm("すべてのデータを削除しますか？")){localStorage.removeItem(KEY);location.reload()}}
+function render(){
+document.title=data.name;
+document.getElementById("festivalName").value=data.name;document.getElementById("date").value=data.date;document.getElementById("start").value=data.start;document.getElementById("end").value=data.end;
+document.getElementById("memberCount").textContent=data.members.length;document.getElementById("shiftCount").textContent=data.shifts.length;
+let ts=times(), head="<th>担当 / 時間</th>"+ts.map(t=>"<th>"+t+"</th>").join("");document.getElementById("timeHead").innerHTML=head;
+let body="";data.roles.forEach(r=>{body+="<tr><td class='name'>"+r.name+"<br><span class='muted'>必要 "+r.need+"人</span></td>";ts.forEach(t=>{let names=data.shifts.filter(s=>s.role===r.name&&s.time===t).map(s=>{let m=data.members.find(x=>x.id===s.memberId);return m?m.name:"";}).filter(Boolean);body+="<td>"+(names.length?names.map(n=>"<div class='shift'>"+n+"</div>").join(""):"—")+"</td>"});body+="</tr>"});document.getElementById("schedule").innerHTML=body;
+document.getElementById("memberList").innerHTML=data.members.length?data.members.map(m=>"<div class='person'><span>"+m.name+"</span><button class='danger' onclick='removeMember("+m.id+")'>削除</button></div>").join(""):"<span class='muted'>まだ登録されていません。</span>";
+document.getElementById("shiftMember").innerHTML=data.members.map(m=>"<option value='"+m.id+"'>"+m.name+"</option>").join("");
+document.getElementById("shiftRole").innerHTML=data.roles.map(r=>"<option>"+r.name+"</option>").join("");
+document.getElementById("shiftTime").innerHTML=ts.map(t=>"<option>"+t+"</option>").join("");
+document.getElementById("shiftList").innerHTML=data.shifts.length?data.shifts.map(s=>{let m=data.members.find(x=>x.id===s.memberId);return "<div class='person'><span><b>"+(m?.name||"不明")+"</b>　"+s.time+"　"+s.role+"</span><button class='danger' onclick='removeShift("+s.id+")'>削除</button></div>"}).join(""):"<span class='muted'>まだ登録されていません。</span>";
+document.getElementById("roleList").innerHTML=data.roles.map((r,i)=>"<div class='person'><span>"+r.name+"　必要 "+r.need+"人</span><button class='danger' onclick='removeRole("+i+")'>削除</button></div>").join("");
+let shortages=[];data.roles.forEach(r=>ts.forEach(t=>{let n=data.shifts.filter(s=>s.role===r.name&&s.time===t).length;if(n<r.need)shortages.push(r.name+" "+t+"（あと "+(r.need-n)+"人）")}));
+document.getElementById("shortageCount").textContent=shortages.length;
+document.getElementById("alerts").innerHTML=shortages.length?"<div class='notice'>⚠️ 人数不足： "+shortages.join("、 ")+"</div>":"<div class='notice ok'>✓ 現在、必要人数を満たしています。</div>";
+}
+render(); showTab("dashboard");
+</script>
+</body>
+</html>
