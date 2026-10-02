@@ -89,7 +89,60 @@ th{background:#eee;position:sticky;top:0;z-index:2}
 .grade-3-cell{background:#fff3e0!important}.grade-4-cell{background:#f3e5f5!important}
 .grade-5-cell{background:#fce4ec!important}.grade-6-cell{background:#ede7f6!important}
 .grade-exec-cell{background:#ffe0b2!important;font-weight:800}
-</style></head>
+</style>
+<style>
+/* スマホ最適化 */
+html{font-size:16px;-webkit-text-size-adjust:100%;}
+body{overflow-x:hidden;}
+button,input,select{font:inherit;}
+nav{position:sticky;top:0;z-index:20;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+nav button{min-height:52px;touch-action:manipulation;}
+.page{padding:12px;max-width:1100px;}
+h2{font-size:21px;margin:6px 0 12px;}
+h3{font-size:18px;}
+.table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;}
+.table-wrap:after{content:"← 横にスワイプできます →";display:block;text-align:center;color:#888;font-size:11px;padding:5px;background:#fafafa;}
+table{font-size:13px;}
+th{font-size:12px;white-space:nowrap;}
+.shift-cell{min-width:78px;height:44px;}
+.time{min-width:78px;font-size:12px;}
+.date-tabs{position:sticky;top:52px;z-index:10;background:#f5f6f8;padding:6px 0;margin:0 -2px 10px;}
+.date-tabs button{min-height:44px;font-size:14px;touch-action:manipulation;}
+.member-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+.member-btn{min-height:56px;padding:10px;font-size:15px;touch-action:manipulation;}
+.add-row{display:grid!important;grid-template-columns:1fr 100px;gap:8px;}
+.add-row input{width:100%;min-width:0;}
+.add-row select{width:100%;min-width:0;}
+.add-row button{grid-column:1 / -1;width:100%;min-height:46px;}
+.personal-table{min-width:520px;}
+.personal-table th.date-head{min-width:140px;}
+.personal-cell{height:46px;min-width:140px;}
+.register-area{position:sticky;bottom:0;z-index:8;padding:10px;margin-left:-2px;margin-right:-2px;border-radius:10px 10px 0 0;}
+.register-area button,.primary,.clear,.danger{min-height:46px;touch-action:manipulation;}
+.admin-grid{grid-template-columns:1fr;}
+.admin-grid select{min-height:46px;}
+.candidate-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+.candidate{min-height:44px;padding:10px 8px;font-size:14px;touch-action:manipulation;}
+.admin-table{min-width:720px;}
+.admin-cell{min-width:80px;height:44px;font-size:12px;}
+.confirmed-note{font-size:12px;}
+@media(min-width:601px){
+  .member-list{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
+  .add-row{display:flex!important;}
+  .add-row button{width:auto;min-height:auto;}
+  .admin-grid{grid-template-columns:repeat(3,1fr);}
+  .candidate-list{display:flex;}
+  .table-wrap:after{display:none;}
+}
+@media(max-width:380px){
+  .page{padding:9px;}
+  header{font-size:18px;padding:12px;}
+  nav button{font-size:13px;padding:10px 3px;}
+  .member-list,.candidate-list{grid-template-columns:1fr 1fr;}
+  .member-grade{font-size:10px;}
+}
+</style>
+</head>
 <body>
 <header>one make たこ焼き</header><div id="syncStatus" style="background:#fff;padding:7px 12px;text-align:center;font-size:12px;color:#666;border-bottom:1px solid #ddd">Firebase接続中…</div>
 
