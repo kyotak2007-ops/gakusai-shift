@@ -278,14 +278,17 @@ function renderMembers(){
  });
 }
 
-function addMember(){
+async function addMember(){
  const input=document.getElementById("memberName");
  const grade=document.getElementById("memberGrade").value;
  const name=input.value.trim();
  if(!name)return;
  if(members.includes(name)){alert("同じ名前がすでに登録されています。");return;}
- members.push(name); memberGrades[name]=grade; save();
- input.value=""; renderMembers();
+ members.push(name);
+ memberGrades[name]=grade;
+ input.value="";
+ renderMembers();
+ await save();
 }
 
 function openMember(name){
@@ -396,7 +399,7 @@ function deleteCurrentMember(){
  closeMember();
 }
 
-const ADMIN_PIN="たこやき";
+const ADMIN_PIN="1111";
 function adminLogin(){
  const pin=document.getElementById("adminPin").value;
  if(pin===ADMIN_PIN){
