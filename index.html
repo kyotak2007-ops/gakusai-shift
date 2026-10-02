@@ -267,9 +267,21 @@ function renderSchedule(){
  });
 }
 
+function escapeHtml(value){
+  return String(value).replace(/[&<>"']/g, ch => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  }[ch]));
+}
+
 function renderMembers(){
- const list=document.getElementById("memberList"); list.innerHTML="";
- if(!members.length){list.innerHTML='<p class="small">まだメンバーが登録されていません。</p>';return;}
+ const list=document.getElementById("memberList");
+ if(!list)return;
+ list.innerHTML="";
+ if(!Array.isArray(members) || !members.length){list.innerHTML='<p class="small">まだメンバーが登録されていません。</p>';return;}
  members.forEach(name=>{
   const b=document.createElement("button"); b.className="member-btn";
   const grade=memberGrades[name]||"未設定";
