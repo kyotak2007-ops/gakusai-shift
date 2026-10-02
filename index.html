@@ -3,123 +3,461 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>学園祭シフト管理</title>
+<title>one make たこ焼き</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f7fb;color:#222}
-header{background:#4f46e5;color:white;padding:20px 16px;position:sticky;top:0;z-index:10}
-h1{margin:0;font-size:22px}.sub{opacity:.85;font-size:13px;margin-top:4px}
-main{max-width:1100px;margin:auto;padding:16px}
-.card{background:white;border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 10px #0000000d}
-h2{font-size:18px;margin:0 0 12px}
-.row{display:flex;gap:8px;flex-wrap:wrap}input,select,button{font:inherit;border-radius:10px;padding:10px;border:1px solid #d7dbe7}
-input,select{background:white;min-width:0;flex:1}button{border:0;background:#4f46e5;color:white;font-weight:600;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}button.secondary{background:#eef0ff;color:#3730a3}button.danger{background:#ef4444}
-.tabs{display:flex;gap:8px;overflow:auto;margin-bottom:16px}.tabs button{white-space:nowrap}
-.tab{display:none}.tab.active{display:block}
-.notice{padding:12px;border-radius:10px;background:#fff7ed;color:#9a3412;margin-top:10px}
-.ok{background:#ecfdf5;color:#047857}
-table{width:100%;border-collapse:collapse;min-width:760px}th,td{border:1px solid #e5e7eb;padding:8px;text-align:center}th{background:#f3f4f6;position:sticky;top:70px}.name{text-align:left;font-weight:600;white-space:nowrap}
-.shift{background:#e0e7ff;color:#3730a3;border-radius:8px;padding:6px;font-size:12px;line-height:1.3}
-.scroll{overflow:auto}
-.person{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding:10px 0}
-.person:last-child{border-bottom:0}.muted{color:#6b7280;font-size:13px}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{background:#f8fafc;padding:14px;border-radius:12px}.num{font-size:24px;font-weight:700}
-@media(max-width:600px){main{padding:10px}.stats{grid-template-columns:1fr 1fr}.card{padding:13px}}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;background:#f5f6f8;color:#222}
+header{background:#222;color:#fff;padding:14px 16px;font-size:20px;font-weight:700}
+nav{display:flex;background:#fff;border-bottom:1px solid #ddd}
+nav button{flex:1;border:0;background:#fff;padding:14px 6px;font-size:15px}
+nav button.active{font-weight:700;border-bottom:3px solid #222}
+.page{display:none;padding:14px;max-width:1100px;margin:auto}
+.page.active{display:block}
+.date-tabs{display:flex;gap:6px;margin-bottom:12px}
+.date-tabs button{flex:1;padding:11px 5px;border:1px solid #bbb;border-radius:8px;background:#fff;font-weight:600}
+.date-tabs button.active{background:#222;color:#fff}
+.table-wrap{overflow:auto;background:#fff;border-radius:10px;box-shadow:0 1px 4px #ddd}
+table{border-collapse:collapse;width:100%;min-width:850px}
+th,td{border:1px solid #d5d5d5;text-align:center;height:46px;padding:5px}
+th{background:#eee;position:sticky;top:0;z-index:2}
+.time{font-weight:700;background:#f7f7f7;position:sticky;left:0;z-index:1;white-space:nowrap}
+.shift-cell{min-width:92px;cursor:pointer}
+.shift-cell.available{background:#dff3e3}
+.shift-cell.assigned{background:#d8e8ff;font-weight:700}
+.hint{color:#666;font-size:13px;margin:8px 0 14px}
+.member-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.member-btn{background:#fff;border:1px solid #ccc;border-radius:10px;padding:14px 10px;font-size:16px;text-align:left;cursor:pointer}
+.member-btn:hover{background:#f0f0f0}
+.add-row{display:flex;gap:8px;margin-bottom:14px}
+.add-row input{flex:1;padding:12px;border:1px solid #bbb;border-radius:8px;font-size:16px}
+.add-row button,.primary{padding:12px 18px;border:0;border-radius:8px;background:#222;color:#fff;font-size:15px;font-weight:600;cursor:pointer}
+.member-detail{display:none}
+.member-detail.active{display:block}
+.back{border:0;background:none;padding:5px 0 12px;font-size:15px;cursor:pointer}
+.member-title{font-size:20px;font-weight:700;margin:4px 0}
+.personal-table{min-width:720px}
+.personal-table th.date-head{min-width:180px}
+.personal-cell{height:48px;cursor:pointer;background:#fff}
+.personal-cell.selected{background:#ccefd4}
+.personal-cell.selected::after{content:"勤務可";font-size:12px;font-weight:700}
+.register-area{margin-top:14px;background:#fff;padding:14px;border-radius:10px;box-shadow:0 1px 4px #ddd}
+.register-area button{width:100%;padding:14px;border:0;border-radius:9px;background:#222;color:#fff;font-size:17px;font-weight:700}
+.status{margin-top:9px;text-align:center;font-size:13px;color:#555}
+.danger{margin-top:8px;background:#fff;color:#c00;border:1px solid #ddd;border-radius:8px;padding:8px 12px;cursor:pointer}
+.small{font-size:12px;color:#666}
+
+.admin-panel{background:#fff;padding:14px;border-radius:10px;box-shadow:0 1px 4px #ddd;margin-bottom:14px}
+.admin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.admin-grid label{display:block;font-size:13px;color:#666;margin-bottom:4px}
+.admin-grid select{width:100%;padding:11px;border:1px solid #bbb;border-radius:8px;font-size:15px;background:#fff}
+.candidate-title{font-weight:700;margin:16px 0 8px}
+.candidate-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.candidate{padding:9px 14px;border:1px solid #aaa;border-radius:20px;background:#fff}
+.candidate.selected{background:#ccefd4;border:2px solid #222}
+.primary{width:100%;margin-top:4px}
+.clear{width:100%;margin-top:8px;padding:10px;border:1px solid #bbb;border-radius:8px;background:#fff}
+.admin-table{min-width:900px}
+.admin-cell{min-width:100px;cursor:pointer}
+.admin-cell.assigned{background:#d8e8ff;font-weight:700}
+@media(max-width:600px){.admin-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<header><h1>🎪 学園祭シフト管理</h1><div class="sub">スマホ対応・ブラウザだけで使える簡易版</div></header>
-<main>
-<div class="tabs">
-<button type="button" data-tab="dashboard">📊 シフト表</button>
-<button type="button" data-tab="members">👥 メンバー</button>
-<button type="button" data-tab="shifts">➕ シフト登録</button>
-<button type="button" data-tab="settings">⚙️ 設定</button>
-</div>
+<header>one make たこ焼き</header><div id="syncStatus" style="background:#fff;padding:7px 12px;text-align:center;font-size:12px;color:#666;border-bottom:1px solid #ddd">Firebase接続中…</div>
 
-<section id="dashboard" class="tab active">
-<div class="card"><h2>今日の状況</h2><div class="stats">
-<div class="stat"><div class="muted">メンバー</div><div class="num" id="memberCount">0</div></div>
-<div class="stat"><div class="muted">登録シフト</div><div class="num" id="shiftCount">0</div></div>
-<div class="stat"><div class="muted">不足時間帯</div><div class="num" id="shortageCount">0</div></div>
-</div><div id="alerts"></div></div>
-<div class="card"><h2>シフト表</h2><div class="scroll"><table><thead><tr id="timeHead"></tr></thead><tbody id="schedule"></tbody></table></div></div>
+<nav>
+  <button id="navSchedule" class="active" onclick="showPage('schedule')">シフト表</button>
+  <button id="navMembers" onclick="showPage('members')">メンバー</button>
+<button id="navAdmin" onclick="showPage('admin')">管理者</button>
+</nav>
+
+<section id="schedule" class="page active">
+  <h2>シフト表</h2>
+  <div class="date-tabs" id="scheduleDates"></div>
+  <p class="hint">横軸が担当場所、縦軸が時間です。登録された勤務可能時間を確認できます。</p>
+  <div class="table-wrap"><table id="scheduleTable"></table></div>
 </section>
 
-<section id="members" class="tab">
-<div class="card"><h2>メンバー追加</h2><div class="row"><input id="memberName" placeholder="名前"><button onclick="addMember()">追加</button></div></div>
-<div class="card"><h2>メンバー一覧</h2><div id="memberList"></div></div>
+<section id="members" class="page">
+  <div id="memberListView">
+    <h2>メンバー</h2>
+    <div class="add-row">
+      <input id="memberName" placeholder="名前を入力">
+      <button onclick="addMember()">追加</button>
+    </div>
+    <div class="member-list" id="memberList"></div>
+    <p class="hint">名前を押すと、その人専用の勤務可能時間入力画面が開きます。</p>
+  </div>
+
+  <div id="memberDetailView" class="member-detail">
+    <button class="back" onclick="closeMember()">← メンバー一覧に戻る</button>
+    <div class="member-title" id="memberTitle"></div>
+    <p class="hint">勤務できる時間をタップして緑色にしてください。最後に「登録」を押してください。</p>
+    <div class="table-wrap"><table id="personalTable" class="personal-table"></table></div>
+    <div class="register-area">
+      <button onclick="registerAvailability()">登録</button>
+      <div class="status" id="registerStatus"></div>
+    </div>
+    <button class="danger" onclick="deleteCurrentMember()">このメンバーを削除</button>
+  </div>
 </section>
 
-<section id="shifts" class="tab">
-<div class="card"><h2>シフトを登録</h2>
-<div class="row"><select id="shiftMember"></select><select id="shiftRole"></select></div>
-<div class="row" style="margin-top:8px"><select id="shiftTime"></select><button onclick="addShift()">登録</button></div>
-<p class="muted">※ 同じ人・同じ時間帯の重複登録はできません。</p>
-</div>
-<div class="card"><h2>登録済みシフト</h2><div id="shiftList"></div></div>
-</section>
 
-<section id="settings" class="tab">
-<div class="card"><h2>出店設定</h2>
-<div class="row"><input id="festivalName" placeholder="出店名"><input id="date" type="date"></div>
-<div class="row" style="margin-top:8px"><input id="start" type="time"><input id="end" type="time"><button onclick="saveSettings()">保存</button></div>
-</div>
-<div class="card"><h2>担当・必要人数</h2>
-<div id="roleList"></div>
-<div class="row" style="margin-top:10px"><input id="newRole" placeholder="例：呼び込み"><input id="newNeed" type="number" min="0" value="1" style="max-width:100px"><button onclick="addRole()">追加</button></div>
-</div>
-<div class="card"><button class="danger" onclick="resetAll()">データをすべて削除</button></div>
-</section>
-</main>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB5OheiN9AYsGNJ2btxpwsVTgorCSe2foY",
+  authDomain: "one-make-oct.firebaseapp.com",
+  projectId: "one-make-oct",
+  storageBucket: "one-make-oct.firebasestorage.app",
+  messagingSenderId: "128887741295",
+  appId: "1:128887741295:web:529c13e024dceac0fde69a",
+  measurementId: "G-CJJSF8G2YC"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+</script>
 
 <script>
-const KEY="gakusai_shift_v1";
-let data=JSON.parse(localStorage.getItem(KEY)||"null")||{
-name:"学園祭 出店",date:"",start:"09:00",end:"17:00",
-roles:[{name:"調理",need:2},{name:"会計",need:2},{name:"接客",need:2},{name:"呼び込み",need:1}],
-members:[],shifts:[]
-};
-function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
-function times(){
- let a=[],[h,m]=data.start.split(":").map(Number),[eh,em]=data.end.split(":").map(Number);
- let cur=h*60+m,end=eh*60+em;
- while(cur<end){let n=cur+60;a.push(String(Math.floor(cur/60)).padStart(2,"0")+":"+String(cur%60).padStart(2,"0")+"–"+String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0"));cur=n}return a;
+const DATES=["10/31","11/1","11/2"];
+const TIMES=[];
+for(let h=8;h<18;h++) TIMES.push(`${h}:00〜${h+1}:00`);
+const POSITIONS=["会計1","会計2","焼き1","焼き2","焼き3","焼き4","盛り付け1","盛り付け2"];
+
+let members=[];
+let availability={};
+let assignments={};
+let currentDate=DATES[0];
+let currentMember=null;
+let adminSelectedMember="";
+
+async function save(){
+  try{
+    await db.collection("app").doc("state").set({
+      members: members,
+      availability: availability,
+      assignments: assignments,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    setSyncStatus("共有データに保存しました");
+  }catch(e){
+    console.error(e);
+    setSyncStatus("保存に失敗しました。Firebaseの設定を確認してください。", true);
+    alert("データの保存に失敗しました。\n" + e.message);
+  }
 }
-function showTab(id){
-  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-  const target=document.getElementById(id);
-  if(target) target.classList.add("active");
-  document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("secondary",b.dataset.tab===id));
+function setSyncStatus(msg,error=false){
+  const el=document.getElementById("syncStatus");
+  if(el){el.textContent=msg;el.style.color=error?"#b00020":"#555";}
 }
-document.querySelectorAll(".tabs button").forEach(btn=>{
-  btn.addEventListener("click",()=>showTab(btn.dataset.tab));
-  btn.addEventListener("touchend",e=>{e.preventDefault();showTab(btn.dataset.tab);},{passive:false});
+async function loadCloudData(){
+  try{
+    const snap=await db.collection("app").doc("state").get();
+    if(snap.exists){
+      const data=snap.data();
+      members=Array.isArray(data.members)?data.members:[];
+      availability=data.availability||{};
+      assignments=data.assignments||{};
+    }
+    setSyncStatus("共有データに接続中");
+    renderSchedule();
+    renderMembers();
+    if(document.getElementById("admin").classList.contains("active")) renderAdmin();
+  }catch(e){
+    console.error(e);
+    setSyncStatus("Firebaseに接続できません",true);
+  }
+}
+db.collection("app").doc("state").onSnapshot(snap=>{
+  if(!snap.exists)return;
+  const data=snap.data();
+  members=Array.isArray(data.members)?data.members:[];
+  availability=data.availability||{};
+  assignments=data.assignments||{};
+  renderSchedule();
+  renderMembers();
+  if(document.getElementById("admin").classList.contains("active")) renderAdmin();
+  setSyncStatus("最新データを表示中");
+},e=>{
+  console.error(e);
+  setSyncStatus("Firebase接続エラー",true);
 });
-function addMember(){let x=document.getElementById("memberName").value.trim();if(!x)return;data.members.push({id:Date.now(),name:x});document.getElementById("memberName").value="";save()}
-function removeMember(id){data.members=data.members.filter(x=>x.id!==id);data.shifts=data.shifts.filter(x=>x.memberId!==id);save()}
-function addRole(){let n=document.getElementById("newRole").value.trim(),need=Number(document.getElementById("newNeed").value)||0;if(!n)return;data.roles.push({name:n,need});document.getElementById("newRole").value="";save()}
-function removeRole(i){data.roles.splice(i,1);data.shifts=data.shifts.filter(s=>s.role!==data.roles[i]?.name);save()}
-function addShift(){let m=Number(document.getElementById("shiftMember").value),role=document.getElementById("shiftRole").value,time=document.getElementById("shiftTime").value;if(!m||!role||!time)return;if(data.shifts.some(s=>s.memberId===m&&s.time===time)){alert("この人はその時間帯にすでに登録されています。");return}data.shifts.push({id:Date.now(),memberId:m,role,time});save()}
-function removeShift(id){data.shifts=data.shifts.filter(s=>s.id!==id);save()}
-function saveSettings(){data.name=document.getElementById("festivalName").value||"学園祭 出店";data.date=document.getElementById("date").value;data.start=document.getElementById("start").value||"09:00";data.end=document.getElementById("end").value||"17:00";save()}
-function resetAll(){if(confirm("すべてのデータを削除しますか？")){localStorage.removeItem(KEY);location.reload()}}
-function render(){
-document.title=data.name;
-document.getElementById("festivalName").value=data.name;document.getElementById("date").value=data.date;document.getElementById("start").value=data.start;document.getElementById("end").value=data.end;
-document.getElementById("memberCount").textContent=data.members.length;document.getElementById("shiftCount").textContent=data.shifts.length;
-let ts=times(), head="<th>担当 / 時間</th>"+ts.map(t=>"<th>"+t+"</th>").join("");document.getElementById("timeHead").innerHTML=head;
-let body="";data.roles.forEach(r=>{body+="<tr><td class='name'>"+r.name+"<br><span class='muted'>必要 "+r.need+"人</span></td>";ts.forEach(t=>{let names=data.shifts.filter(s=>s.role===r.name&&s.time===t).map(s=>{let m=data.members.find(x=>x.id===s.memberId);return m?m.name:"";}).filter(Boolean);body+="<td>"+(names.length?names.map(n=>"<div class='shift'>"+n+"</div>").join(""):"—")+"</td>"});body+="</tr>"});document.getElementById("schedule").innerHTML=body;
-document.getElementById("memberList").innerHTML=data.members.length?data.members.map(m=>"<div class='person'><span>"+m.name+"</span><button class='danger' onclick='removeMember("+m.id+")'>削除</button></div>").join(""):"<span class='muted'>まだ登録されていません。</span>";
-document.getElementById("shiftMember").innerHTML=data.members.map(m=>"<option value='"+m.id+"'>"+m.name+"</option>").join("");
-document.getElementById("shiftRole").innerHTML=data.roles.map(r=>"<option>"+r.name+"</option>").join("");
-document.getElementById("shiftTime").innerHTML=ts.map(t=>"<option>"+t+"</option>").join("");
-document.getElementById("shiftList").innerHTML=data.shifts.length?data.shifts.map(s=>{let m=data.members.find(x=>x.id===s.memberId);return "<div class='person'><span><b>"+(m?.name||"不明")+"</b>　"+s.time+"　"+s.role+"</span><button class='danger' onclick='removeShift("+s.id+")'>削除</button></div>"}).join(""):"<span class='muted'>まだ登録されていません。</span>";
-document.getElementById("roleList").innerHTML=data.roles.map((r,i)=>"<div class='person'><span>"+r.name+"　必要 "+r.need+"人</span><button class='danger' onclick='removeRole("+i+")'>削除</button></div>").join("");
-let shortages=[];data.roles.forEach(r=>ts.forEach(t=>{let n=data.shifts.filter(s=>s.role===r.name&&s.time===t).length;if(n<r.need)shortages.push(r.name+" "+t+"（あと "+(r.need-n)+"人）")}));
-document.getElementById("shortageCount").textContent=shortages.length;
-document.getElementById("alerts").innerHTML=shortages.length?"<div class='notice'>⚠️ 人数不足： "+shortages.join("、 ")+"</div>":"<div class='notice ok'>✓ 現在、必要人数を満たしています。</div>";
+
+function showPage(page){
+ document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+ document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
+ document.getElementById(page).classList.add("active");
+ const navId=page==="schedule"?"navSchedule":page==="members"?"navMembers":"navAdmin";
+ document.getElementById(navId).classList.add("active");
+ if(page==="schedule")renderSchedule();
+ if(page==="members")renderMembers();
+ if(page==="admin"){setupAdmin();renderAdmin();}
 }
-render(); showTab("dashboard");
+
+function renderDateTabs(id,callback){
+ const box=document.getElementById(id);box.innerHTML="";
+ DATES.forEach(d=>{
+  const b=document.createElement("button");
+  b.textContent=d;
+  if(d===currentDate)b.classList.add("active");
+  b.onclick=()=>{currentDate=d;callback()};
+  box.appendChild(b);
+ });
+}
+
+function renderSchedule(){
+ renderDateTabs("scheduleDates",renderSchedule);
+ const table=document.getElementById("scheduleTable");
+ table.innerHTML="<tr><th>時間</th>"+POSITIONS.map(p=>`<th>${p}</th>`).join("")+"</tr>";
+ TIMES.forEach((time,ti)=>{
+  const tr=document.createElement("tr");
+  tr.innerHTML=`<td class="time">${time}</td>`;
+  POSITIONS.forEach(p=>{
+   const td=document.createElement("td");
+   td.className="shift-cell";
+   const key=`${currentDate}|${ti}|${p}`;
+   if(assignments[key]){
+    td.classList.add("assigned");
+    td.textContent=assignments[key];
+   }
+   tr.appendChild(td);
+  });
+  table.appendChild(tr);
+ });
+}
+
+function renderMembers(){
+ const list=document.getElementById("memberList");
+ list.innerHTML="";
+ if(!members.length){
+  list.innerHTML='<p class="small">まだメンバーが登録されていません。</p>';
+  return;
+ }
+ members.forEach(name=>{
+  const b=document.createElement("button");
+  b.className="member-btn";
+  b.textContent=name;
+  b.onclick=()=>openMember(name);
+  list.appendChild(b);
+ });
+}
+
+function addMember(){
+ const input=document.getElementById("memberName");
+ const name=input.value.trim();
+ if(!name)return;
+ if(members.includes(name)){
+  alert("同じ名前がすでに登録されています。");
+  return;
+ }
+ members.push(name);
+ save();
+ input.value="";
+ renderMembers();
+}
+
+function openMember(name){
+ currentMember=name;
+ document.getElementById("memberListView").style.display="none";
+ document.getElementById("memberDetailView").classList.add("active");
+ document.getElementById("memberTitle").textContent=`${name} さんの勤務可能時間`;
+ document.getElementById("registerStatus").textContent="";
+ renderPersonalTable();
+}
+
+function closeMember(){
+ currentMember=null;
+ document.getElementById("memberDetailView").classList.remove("active");
+ document.getElementById("memberListView").style.display="block";
+ renderMembers();
+}
+
+function renderPersonalTable(){
+ const table=document.getElementById("personalTable");
+ table.innerHTML="<tr><th>時間</th>"+DATES.map(d=>`<th>${d}</th>`).join("")+"</tr>";
+ TIMES.forEach((time,ti)=>{
+  const tr=document.createElement("tr");
+  tr.innerHTML=`<td class="time">${time}</td>`;
+  DATES.forEach(d=>{
+   const td=document.createElement("td");
+   td.className="personal-cell";
+   const key=`${currentMember}|${d}|${ti}`;
+   if(availability[key])td.classList.add("selected");
+   td.onclick=()=>td.classList.toggle("selected");
+   tr.appendChild(td);
+  });
+  table.appendChild(tr);
+ });
+}
+
+function registerAvailability(){
+ if(!currentMember)return;
+ const cells=document.querySelectorAll(".personal-cell");
+ let i=0;
+ TIMES.forEach((time,ti)=>{
+  DATES.forEach(d=>{
+   availability[`${currentMember}|${d}|${ti}`]=cells[i++].classList.contains("selected");
+  });
+ });
+ save();
+ document.getElementById("registerStatus").textContent="勤務可能時間を登録しました。";
+}
+
+function deleteCurrentMember(){
+ if(!currentMember)return;
+ if(!confirm(`${currentMember} さんを削除しますか？`))return;
+ members=members.filter(x=>x!==currentMember);
+ Object.keys(availability).forEach(k=>{
+  if(k.startsWith(currentMember+"|"))delete availability[k];
+ });
+ Object.keys(assignments).forEach(k=>{
+  if(assignments[k]===currentMember)delete assignments[k];
+ });
+ save();
+ closeMember();
+}
+
+function setupAdmin(){
+ const d=document.getElementById("adminDate");
+ const t=document.getElementById("adminTime");
+ const p=document.getElementById("adminPosition");
+ if(!d.options.length)DATES.forEach(x=>{
+  const o=document.createElement("option");o.value=x;o.textContent=x;d.appendChild(o);
+ });
+ if(!t.options.length)TIMES.forEach((x,i)=>{
+  const o=document.createElement("option");o.value=i;o.textContent=x;t.appendChild(o);
+ });
+ if(!p.options.length)POSITIONS.forEach(x=>{
+  const o=document.createElement("option");o.value=x;o.textContent=x;p.appendChild(o);
+ });
+ d.value=currentDate;
+ d.onchange=renderAdmin;
+ t.onchange=renderAdmin;
+ p.onchange=renderAdmin;
+}
+
+function renderAdmin(){
+ const d=document.getElementById("adminDate").value;
+ const ti=Number(document.getElementById("adminTime").value);
+ const pos=document.getElementById("adminPosition").value;
+ currentDate=d;
+ adminSelectedMember="";
+ const list=document.getElementById("candidateList");
+ list.innerHTML="";
+ const candidates=members.filter(name=>availability[`${name}|${d}|${ti}`]);
+ if(!candidates.length){
+  list.innerHTML='<span class="small">この時間に勤務可能と提出したメンバーはいません。</span>';
+ }else{
+  candidates.forEach(name=>{
+   const b=document.createElement("button");
+   b.className="candidate";
+   b.textContent=name;
+   b.onclick=()=>{
+    adminSelectedMember=name;
+    document.querySelectorAll(".candidate").forEach(x=>x.classList.remove("selected"));
+    b.classList.add("selected");
+   };
+   list.appendChild(b);
+  });
+ }
+ const key=`${d}|${ti}|${pos}`;
+ const assigned=assignments[key];
+ document.getElementById("adminStatus").textContent=
+  assigned?`現在の担当：${assigned}`:"現在、この枠には担当者が設定されていません。";
+ renderAdminTable();
+ renderDateTabs("adminDates",renderAdmin);
+}
+
+function assignSelected(){
+ if(!adminSelectedMember){
+  alert("勤務可能なメンバーを選択してください。");
+  return;
+ }
+ const d=document.getElementById("adminDate").value;
+ const ti=Number(document.getElementById("adminTime").value);
+ const pos=document.getElementById("adminPosition").value;
+ assignments[`${d}|${ti}|${pos}`]=adminSelectedMember;
+ save();
+ document.getElementById("adminStatus").textContent=
+  `${adminSelectedMember} さんを ${pos} に割り当てました。`;
+ renderAdminTable();
+ renderSchedule();
+}
+
+function clearAssignment(){
+ const d=document.getElementById("adminDate").value;
+ const ti=Number(document.getElementById("adminTime").value);
+ const pos=document.getElementById("adminPosition").value;
+ delete assignments[`${d}|${ti}|${pos}`];
+ save();
+ document.getElementById("adminStatus").textContent="割り当てを解除しました。";
+ renderAdminTable();
+ renderSchedule();
+}
+
+function renderAdminTable(){
+ const table=document.getElementById("adminTable");
+ table.innerHTML="<tr><th>時間</th>"+POSITIONS.map(p=>`<th>${p}</th>`).join("")+"</tr>";
+ TIMES.forEach((time,ti)=>{
+  const tr=document.createElement("tr");
+  tr.innerHTML=`<td class="time">${time}</td>`;
+  POSITIONS.forEach(p=>{
+   const td=document.createElement("td");
+   td.className="admin-cell";
+   const key=`${currentDate}|${ti}|${p}`;
+   if(assignments[key]){
+    td.classList.add("assigned");
+    td.textContent=assignments[key];
+   }
+   td.onclick=()=>{
+    document.getElementById("adminDate").value=currentDate;
+    document.getElementById("adminTime").value=ti;
+    document.getElementById("adminPosition").value=p;
+    renderAdmin();
+   };
+   tr.appendChild(td);
+  });
+  table.appendChild(tr);
+ });
+}
+
+renderSchedule();
+renderMembers();
+loadCloudData();
 </script>
+
+<section id="admin" class="page">
+  <h2>管理者</h2>
+  <p class="hint">提出された勤務可能時間を確認し、管理者が担当場所を決定します。</p>
+
+  <div class="admin-panel">
+    <div class="admin-grid">
+      <div>
+        <label>日付</label>
+        <select id="adminDate"></select>
+      </div>
+      <div>
+        <label>時間</label>
+        <select id="adminTime"></select>
+      </div>
+      <div>
+        <label>担当場所</label>
+        <select id="adminPosition"></select>
+      </div>
+    </div>
+
+    <div class="candidate-title">この時間に勤務可能なメンバー</div>
+    <div id="candidateList" class="candidate-list"></div>
+    <button class="primary" onclick="assignSelected()">選択した人を割り当てる</button>
+    <button class="clear" onclick="clearAssignment()">この枠の割り当てを解除</button>
+    <div id="adminStatus" class="status"></div>
+  </div>
+
+  <h3>確定シフト</h3>
+  <div class="date-tabs" id="adminDates"></div>
+  <div class="table-wrap"><table id="adminTable"></table></div>
+</section>
+
 </body>
 </html>
