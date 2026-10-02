@@ -60,8 +60,36 @@ th{background:#eee;position:sticky;top:0;z-index:2}
 .admin-cell{min-width:100px;cursor:pointer}
 .admin-cell.assigned{background:#d8e8ff;font-weight:700}
 @media(max-width:600px){.admin-grid{grid-template-columns:1fr}}
+
+.personal-cell.confirmed{
+  background:#d8e8ff !important;
+  border:2px solid #4d86c5;
+  font-weight:800;
+}
+.personal-cell.confirmed::after{
+  content:"シフト確定";
+  font-size:12px;
+}
+.personal-cell.selected:not(.confirmed)::after{
+  content:"勤務可";
+  font-size:12px;
+  font-weight:700;
+}
+.confirmed-note{
+  margin-top:10px;
+  padding:10px;
+  border-radius:8px;
+  background:#eef6ff;
+  font-size:13px;
+}
 </style>
-</head>
+<style>
+.member-grade{font-size:11px;padding:3px 6px;border-radius:10px;margin-left:5px}
+.grade-1-cell{background:#e3f2fd!important}.grade-2-cell{background:#e8f5e9!important}
+.grade-3-cell{background:#fff3e0!important}.grade-4-cell{background:#f3e5f5!important}
+.grade-5-cell{background:#fce4ec!important}.grade-6-cell{background:#ede7f6!important}
+.grade-exec-cell{background:#ffe0b2!important;font-weight:800}
+</style></head>
 <body>
 <header>one make たこ焼き</header><div id="syncStatus" style="background:#fff;padding:7px 12px;text-align:center;font-size:12px;color:#666;border-bottom:1px solid #ddd">Firebase接続中…</div>
 
@@ -81,8 +109,14 @@ th{background:#eee;position:sticky;top:0;z-index:2}
 <section id="members" class="page">
   <div id="memberListView">
     <h2>メンバー</h2>
-    <div class="add-row">
+    <div class="add-row" style="flex-wrap:wrap">
       <input id="memberName" placeholder="名前を入力">
+      <select id="memberGrade" style="padding:12px;border:1px solid #bbb;border-radius:8px;font-size:16px">
+        <option value="1年">1年</option><option value="2年">2年</option>
+        <option value="3年">3年</option><option value="4年">4年</option>
+        <option value="5年">5年</option><option value="6年">6年</option>
+        <option value="幹部">幹部</option>
+      </select>
       <button onclick="addMember()">追加</button>
     </div>
     <div class="member-list" id="memberList"></div>
@@ -128,6 +162,7 @@ const POSITIONS=["会計1","会計2","焼き1","焼き2","焼き3","焼き4","�
 let members=[];
 let availability={};
 let assignments={};
+let memberGrades={};
 let currentDate=DATES[0];
 let currentMember=null;
 let adminSelectedMember="";
@@ -138,6 +173,7 @@ async function save(){
       members: members,
       availability: availability,
       assignments: assignments,
+      memberGrades: memberGrades,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     setSyncStatus("共有データに保存しました");
@@ -159,6 +195,7 @@ async function loadCloudData(){
       members=Array.isArray(data.members)?data.members:[];
       availability=data.availability||{};
       assignments=data.assignments||{};
+      memberGrades=data.memberGrades||{};
     }
     setSyncStatus("共有データに接続中");
     renderSchedule();
@@ -175,6 +212,7 @@ db.collection("app").doc("state").onSnapshot(snap=>{
   members=Array.isArray(data.members)?data.members:[];
   availability=data.availability||{};
   assignments=data.assignments||{};
+  memberGrades=data.memberGrades||{};
   renderSchedule();
   renderMembers();
   if(document.getElementById("admin").classList.contains("active")) renderAdmin();
@@ -192,7 +230,7 @@ function showPage(page){
  document.getElementById(navId).classList.add("active");
  if(page==="schedule")renderSchedule();
  if(page==="members")renderMembers();
- if(page==="admin"){setupAdmin();renderAdmin();}
+ if(page==="admin"){checkAdminLogin(); if(sessionStorage.getItem("one_make_admin")==="1"){setupAdmin();renderAdmin();}}
 }
 
 function renderDateTabs(id,callback){
@@ -219,7 +257,9 @@ function renderSchedule(){
    const key=`${currentDate}|${ti}|${p}`;
    if(assignments[key]){
     td.classList.add("assigned");
-    td.textContent=assignments[key];
+    const n=assignments[key], g=memberGrades[n]||"";
+    td.classList.add(g==="幹部"?"grade-exec-cell":"grade-"+g.replace("年","")+"-cell");
+    td.textContent=n;
    }
    tr.appendChild(td);
   });
@@ -228,33 +268,24 @@ function renderSchedule(){
 }
 
 function renderMembers(){
- const list=document.getElementById("memberList");
- list.innerHTML="";
- if(!members.length){
-  list.innerHTML='<p class="small">まだメンバーが登録されていません。</p>';
-  return;
- }
+ const list=document.getElementById("memberList"); list.innerHTML="";
+ if(!members.length){list.innerHTML='<p class="small">まだメンバーが登録されていません。</p>';return;}
  members.forEach(name=>{
-  const b=document.createElement("button");
-  b.className="member-btn";
-  b.textContent=name;
-  b.onclick=()=>openMember(name);
-  list.appendChild(b);
+  const b=document.createElement("button"); b.className="member-btn";
+  const grade=memberGrades[name]||"未設定";
+  b.innerHTML=`${escapeHtml(name)} <span class="member-grade">${escapeHtml(grade)}</span>`;
+  b.onclick=()=>openMember(name); list.appendChild(b);
  });
 }
 
 function addMember(){
  const input=document.getElementById("memberName");
+ const grade=document.getElementById("memberGrade").value;
  const name=input.value.trim();
  if(!name)return;
- if(members.includes(name)){
-  alert("同じ名前がすでに登録されています。");
-  return;
- }
- members.push(name);
- save();
- input.value="";
- renderMembers();
+ if(members.includes(name)){alert("同じ名前がすでに登録されています。");return;}
+ members.push(name); memberGrades[name]=grade; save();
+ input.value=""; renderMembers();
 }
 
 function openMember(name){
@@ -276,38 +307,85 @@ function closeMember(){
 function renderPersonalTable(){
  const table=document.getElementById("personalTable");
  table.innerHTML="<tr><th>時間</th>"+DATES.map(d=>`<th>${d}</th>`).join("")+"</tr>";
+
  TIMES.forEach((time,ti)=>{
   const tr=document.createElement("tr");
   tr.innerHTML=`<td class="time">${time}</td>`;
+
   DATES.forEach(d=>{
    const td=document.createElement("td");
    td.className="personal-cell";
-   const key=`${currentMember}|${d}|${ti}`;
-   if(availability[key])td.classList.add("selected");
-   td.onclick=()=>td.classList.toggle("selected");
+
+   const availabilityKey=`${currentMember}|${d}|${ti}`;
+   if(availability[availabilityKey]) td.classList.add("selected");
+
+   // 管理者がこの人をどこかの担当に確定しているか確認
+   const assignedPositions=POSITIONS.filter(pos=>{
+     return assignments[`${d}|${ti}|${pos}`]===currentMember;
+   });
+
+   if(assignedPositions.length){
+     td.classList.add("confirmed");
+     td.title=`シフト確定：${assignedPositions.join("・")}`;
+     td.dataset.confirmed="1";
+   }else{
+     td.onclick=()=>td.classList.toggle("selected");
+   }
+
    tr.appendChild(td);
   });
+
   table.appendChild(tr);
  });
+
+ // 確定シフトの説明を表示
+ let note=document.getElementById("confirmedNote");
+ if(!note){
+   note=document.createElement("div");
+   note.id="confirmedNote";
+   note.className="confirmed-note";
+   table.parentElement.parentElement.appendChild(note);
+ }
+ const confirmedCount=Object.entries(assignments).filter(([key,name])=>{
+   const [d,ti,pos]=key.split("|");
+   return name===currentMember;
+ }).length;
+
+ note.textContent=confirmedCount
+   ? `🔵 青色の「シフト確定」は、管理者があなたを実際の担当として決定した時間です。`
+   : `🔵 管理者がシフトを確定すると、この画面に「シフト確定」と表示されます。`;
 }
 
 function registerAvailability(){
  if(!currentMember)return;
+
  const cells=document.querySelectorAll(".personal-cell");
  let i=0;
+
  TIMES.forEach((time,ti)=>{
   DATES.forEach(d=>{
-   availability[`${currentMember}|${d}|${ti}`]=cells[i++].classList.contains("selected");
+   const key=`${currentMember}|${d}|${ti}`;
+   const cell=cells[i++];
+
+   // 既に管理者が確定した時間は、勤務可能情報を変更しない
+   const confirmed=POSITIONS.some(pos=>assignments[`${d}|${ti}|${pos}`]===currentMember);
+
+   if(!confirmed){
+     availability[key]=cell.classList.contains("selected");
+   }
   });
  });
+
  save();
  document.getElementById("registerStatus").textContent="勤務可能時間を登録しました。";
+ renderPersonalTable();
 }
 
 function deleteCurrentMember(){
  if(!currentMember)return;
  if(!confirm(`${currentMember} さんを削除しますか？`))return;
  members=members.filter(x=>x!==currentMember);
+ delete memberGrades[currentMember];
  Object.keys(availability).forEach(k=>{
   if(k.startsWith(currentMember+"|"))delete availability[k];
  });
@@ -318,6 +396,27 @@ function deleteCurrentMember(){
  closeMember();
 }
 
+const ADMIN_PIN="たこやき";
+function adminLogin(){
+ const pin=document.getElementById("adminPin").value;
+ if(pin===ADMIN_PIN){
+  sessionStorage.setItem("one_make_admin","1");
+  document.getElementById("adminLogin").style.display="none";
+  document.getElementById("adminContent").style.display="block";
+  setupAdmin(); renderAdmin();
+ }else document.getElementById("loginStatus").textContent="パスコードが違います。";
+}
+function adminLogout(){
+ sessionStorage.removeItem("one_make_admin");
+ document.getElementById("adminContent").style.display="none";
+ document.getElementById("adminLogin").style.display="block";
+ document.getElementById("adminPin").value="";
+}
+function checkAdminLogin(){
+ const ok=sessionStorage.getItem("one_make_admin")==="1";
+ document.getElementById("adminLogin").style.display=ok?"none":"block";
+ document.getElementById("adminContent").style.display=ok?"block":"none";
+}
 function setupAdmin(){
  const d=document.getElementById("adminDate");
  const t=document.getElementById("adminTime");
@@ -377,12 +476,21 @@ function assignSelected(){
  const d=document.getElementById("adminDate").value;
  const ti=Number(document.getElementById("adminTime").value);
  const pos=document.getElementById("adminPosition").value;
- assignments[`${d}|${ti}|${pos}`]=adminSelectedMember;
+ const conflict=Object.entries(assignments).some(([key,name])=>{
+  const [kd,kti,kpos]=key.split("|");
+  return kd===d && Number(kti)===ti && name===adminSelectedMember && kpos!==pos;
+});
+if(conflict){
+  alert(`${adminSelectedMember} さんはこの時間にすでに別の仕事が割り当てられています。`);
+  return;
+}
+assignments[`${d}|${ti}|${pos}`]=adminSelectedMember;
  save();
  document.getElementById("adminStatus").textContent=
   `${adminSelectedMember} さんを ${pos} に割り当てました。`;
  renderAdminTable();
  renderSchedule();
+ if(currentMember) renderPersonalTable();
 }
 
 function clearAssignment(){
@@ -394,6 +502,7 @@ function clearAssignment(){
  document.getElementById("adminStatus").textContent="割り当てを解除しました。";
  renderAdminTable();
  renderSchedule();
+ if(currentMember) renderPersonalTable();
 }
 
 function renderAdminTable(){
@@ -408,7 +517,9 @@ function renderAdminTable(){
    const key=`${currentDate}|${ti}|${p}`;
    if(assignments[key]){
     td.classList.add("assigned");
-    td.textContent=assignments[key];
+    const n=assignments[key], g=memberGrades[n]||"";
+    td.classList.add(g==="幹部"?"grade-exec-cell":"grade-"+g.replace("年","")+"-cell");
+    td.textContent=n;
    }
    td.onclick=()=>{
     document.getElementById("adminDate").value=currentDate;
@@ -428,7 +539,17 @@ loadCloudData();
 </script>
 
 <section id="admin" class="page">
-  <h2>管理者</h2>
+  <div id="adminLogin">
+    <h2>管理者ログイン</h2>
+    <p class="hint">管理者用パスコードを入力してください。</p>
+    <input id="adminPin" type="password" placeholder="パスコード" style="width:100%;padding:13px;border:1px solid #bbb;border-radius:8px;font-size:18px">
+    <button class="primary" style="width:100%;margin-top:10px" onclick="adminLogin()">ログイン</button>
+    <div id="loginStatus" class="status"></div>
+  </div>
+  <div id="adminContent" style="display:none">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+  <h2>管理者</h2><button class="clear" style="width:auto" onclick="adminLogout()">ログアウト</button>
+  </div>
   <p class="hint">提出された勤務可能時間を確認し、管理者が担当場所を決定します。</p>
 
   <div class="admin-panel">
@@ -457,6 +578,7 @@ loadCloudData();
   <h3>確定シフト</h3>
   <div class="date-tabs" id="adminDates"></div>
   <div class="table-wrap"><table id="adminTable"></table></div>
+  </div>
 </section>
 
 </body>
