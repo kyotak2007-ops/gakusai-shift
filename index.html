@@ -243,6 +243,12 @@ th{font-size:12px;white-space:nowrap;}
 </nav>
 
 <section id="schedule" class="page active">
+  <div class="bulletin">
+    <div class="bulletin-title">📌 掲示板</div>
+    <textarea id="bulletinText" placeholder="今必要なもの・連絡事項などを自由に書いてください"></textarea>
+    <button class="bulletin-save" onclick="saveBulletin()">掲示板を更新</button>
+    <div id="bulletinStatus" class="bulletin-status"></div>
+  </div>
   <h2>シフト表</h2>
   <div class="date-tabs" id="scheduleDates"></div>
   <p class="hint">横軸が担当場所、縦軸が時間です。登録された勤務可能時間を確認できます。</p>
@@ -297,15 +303,16 @@ const db = firebase.firestore();
 </script>
 
 <script>
-const DATES=["10/31","11/1","11/2"];
+const DATES=["10/30","10/31","11/1"];
 const TIMES=[];
-for(let h=8;h<18;h++) TIMES.push(`${h}:00〜${h+1}:00`);
-const POSITIONS=["会計1","会計2","焼き1","焼き2","焼き3","焼き4","盛り付け1","盛り付け2"];
+for(let h=10;h<19;h++) TIMES.push(`${h}:00〜${h+1}:00`);
+const POSITIONS=["会計1","会計2","焼き1","焼き2","焼き3","焼き4","焼き5","焼き6","焼き7","焼き8","渡し係","客引き係","生地係1","生地係2"];
 
 let members=[];
 let availability={};
 let assignments={};
 let memberGrades={};
+let bulletin="";
 let currentDate=DATES[0];
 let currentMember=null;
 let adminSelectedMember="";
@@ -317,6 +324,7 @@ async function save(){
       availability: availability,
       assignments: assignments,
       memberGrades: memberGrades,
+      bulletin: bulletin,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     setSyncStatus("共有データに保存しました");
@@ -339,6 +347,7 @@ async function loadCloudData(){
       availability=data.availability||{};
       assignments=data.assignments||{};
       memberGrades=data.memberGrades||{};
+      bulletin=typeof data.bulletin==="string"?data.bulletin:"";
     }
     setSyncStatus("共有データに接続中");
     renderSchedule();
@@ -356,6 +365,8 @@ db.collection("app").doc("state").onSnapshot(snap=>{
   availability=data.availability||{};
   assignments=data.assignments||{};
   memberGrades=data.memberGrades||{};
+  bulletin=typeof data.bulletin==="string"?data.bulletin:"";
+  renderBulletin();
   renderSchedule();
   renderMembers();
   if(document.getElementById("admin").classList.contains("active")) renderAdmin();
@@ -385,6 +396,19 @@ function renderDateTabs(id,callback){
   b.onclick=()=>{currentDate=d;callback()};
   box.appendChild(b);
  });
+}
+
+function renderBulletin(){
+ const el=document.getElementById("bulletinText");
+ if(el && document.activeElement!==el) el.value=bulletin||"";
+}
+async function saveBulletin(){
+ const el=document.getElementById("bulletinText");
+ if(!el)return;
+ bulletin=el.value;
+ await save();
+ const st=document.getElementById("bulletinStatus");
+ if(st){st.textContent="更新しました";setTimeout(()=>{st.textContent=""},1500);}
 }
 
 function renderSchedule(){
@@ -691,6 +715,7 @@ function renderAdminTable(){
  });
 }
 
+renderBulletin();
 renderSchedule();
 renderMembers();
 loadCloudData();
