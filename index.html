@@ -315,9 +315,116 @@ th{background:#f5eee4;color:#5c564e}
 .back{color:#6d655b}.danger{color:#b85c50;border-color:#efd0c8;background:#fff8f5}
 @media(max-width:700px){.expense-form{grid-template-columns:1fr 1fr}.expense-form input:first-child{grid-column:1/-1}.expense-add{grid-column:1/-1;min-height:44px}.expense-row{grid-template-columns:1fr auto 28px}.expense-buyer{grid-column:1}.expense-amount{grid-column:2;grid-row:1}.expense-delete{grid-column:3;grid-row:1}.section-title-row{align-items:flex-start}.sales-main{min-height:88px}}
 @media(max-width:600px){.sales-grid{gap:6px}.sales-card{padding:7px}.sales-main{font-size:20px}.sales-count{font-size:19px;margin:8px 0 5px}.sales-minus{width:50px;height:34px}}
-</style></head>
+</style>
+<style>
+/* v14 — Digital Agency Design System β版 v2.18.0を参考にしたUI */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
+:root{
+  --dads-blue:#005ea8;
+  --dads-blue-hover:#004b87;
+  --dads-blue-pale:#e8f3fb;
+  --dads-text:#1a1a1a;
+  --dads-muted:#5f6368;
+  --dads-border:#b8bec5;
+  --dads-border-strong:#777d84;
+  --dads-bg:#f6f8fa;
+  --dads-surface:#fff;
+  --dads-focus:#0066ff;
+  --dads-danger:#b42318;
+  --dads-danger-pale:#fff1f0;
+  --dads-success:#18794e;
+  --dads-success-pale:#eaf6ef;
+  --dads-yellow:#fff7d6;
+}
+html,body,button,input,select,textarea{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;}
+html{font-size:16px;}
+body{background:var(--dads-bg);color:var(--dads-text);line-height:1.75;letter-spacing:.01em;}
+button,input,select,textarea{font-weight:400;}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--dads-focus);outline-offset:2px;}
+.site-header{background:#fff;color:var(--dads-text);border-bottom:1px solid var(--dads-border);padding:14px 18px;}
+.site-header-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:11px;}
+.brand-mark{width:26px;height:26px;display:grid;place-items:center;color:var(--dads-blue);font-size:16px;line-height:1;}
+.site-title{font-size:20px;font-weight:700;line-height:1.35;}
+.site-subtitle{font-size:12px;color:var(--dads-muted);line-height:1.4;margin-top:1px;}
+nav{background:#fff!important;border-bottom:1px solid var(--dads-border)!important;box-shadow:none!important;}
+nav button{color:var(--dads-text)!important;background:#fff!important;border:0!important;border-bottom:4px solid transparent!important;min-height:52px;font-size:15px;font-weight:600!important;}
+nav button.active{color:var(--dads-blue)!important;border-bottom-color:var(--dads-blue)!important;background:#fff!important;}
+.page{max-width:1100px;padding:24px 18px 40px;}
+h2{font-size:24px;line-height:1.5;margin:0 0 16px;font-weight:700;}
+h3{font-size:20px;line-height:1.5;margin:28px 0 12px;}
+.hint,.small{color:var(--dads-muted);font-size:14px;}
+.hint{margin:0 0 16px;}
+.date-tabs{gap:0;margin-bottom:18px;border-bottom:1px solid var(--dads-border);}
+.date-tabs button{border:0!important;border-bottom:4px solid transparent!important;border-radius:0!important;background:#fff!important;color:var(--dads-text)!important;min-height:48px;font-weight:600;}
+.date-tabs button.active{background:#fff!important;color:var(--dads-blue)!important;border-bottom-color:var(--dads-blue)!important;}
+.table-wrap{border:1px solid var(--dads-border);border-radius:2px!important;box-shadow:none!important;background:#fff;}
+table{font-size:14px;}
+th,td{border-color:#d4d8dc;}
+th{background:#eef1f4;color:#1a1a1a;font-weight:700;}
+.time{background:#f7f8fa;color:#1a1a1a;}
+.shift-cell.assigned,.admin-cell.assigned{font-weight:700;}
+.shift-cell{min-width:92px;}
+/* grade colors remain intentionally light so text stays readable */
+.grade-1-cell{background:#eaf4fb!important}.grade-2-cell{background:#edf7f1!important}.grade-3-cell{background:#fff6df!important}.grade-4-cell{background:#f4effa!important}.grade-5-cell{background:#fff0f3!important}.grade-6-cell{background:#f0f1fb!important}.grade-exec-cell{background:#f6eadb!important;font-weight:700}
+.shift-cell.assigned,.admin-cell.assigned{outline:1px solid rgba(0,0,0,.04);outline-offset:-1px;}
+.bulletin{background:#fff!important;border:1px solid var(--dads-border)!important;border-radius:2px!important;box-shadow:none!important;padding:16px!important;margin-bottom:28px!important;}
+.bulletin-title{font-size:18px;font-weight:700;margin-bottom:8px;color:var(--dads-text);}
+.shortage-list{}
+.shortage-item{background:#f7f8fa!important;border:1px solid #d4d8dc!important;border-radius:2px!important;padding:7px 10px!important;color:var(--dads-text);}
+.shortage-item button{color:var(--dads-danger)!important;min-width:36px;min-height:36px;}
+.shortage-add{grid-template-columns:1fr 96px!important;}
+.shortage-add input,.add-row input,.add-row select,.admin-grid select,.expense-form input,#adminPin{border:1px solid var(--dads-border-strong)!important;border-radius:2px!important;background:#fff!important;min-height:48px;}
+.shortage-add button,.primary,.add-row button,.expense-add{background:var(--dads-blue)!important;color:#fff!important;border:1px solid var(--dads-blue)!important;border-radius:2px!important;min-height:48px;font-weight:700;}
+.shortage-add button:hover,.primary:hover,.add-row button:hover,.expense-add:hover{background:var(--dads-blue-hover)!important;}
+.sales-head{margin-bottom:10px;}
+.sales-grid{gap:12px!important;}
+.sales-card{background:#fff!important;border:1px solid var(--dads-border)!important;border-radius:2px!important;box-shadow:none!important;padding:10px!important;}
+.sales-main{border-radius:2px!important;box-shadow:none!important;min-height:104px!important;font-size:24px!important;font-weight:700!important;}
+.sales-source{background:#0066a8!important;color:#fff!important;}.sales-cheese{background:#d9a300!important;color:#1a1a1a!important;}.sales-oroshi{background:#3f7f7a!important;color:#fff!important;}
+.sales-count{font-size:22px;font-weight:700;margin:10px 0 6px;}
+.sales-minus{width:64px!important;height:40px!important;border:1px solid var(--dads-border-strong)!important;border-radius:2px!important;background:#fff!important;color:var(--dads-text)!important;font-weight:700;}
+.sales-total{background:#fff!important;border:2px solid var(--dads-blue)!important;border-radius:2px!important;box-shadow:none!important;padding:18px!important;margin-top:16px!important;}
+.sales-total-label{color:var(--dads-muted);font-size:14px;}.sales-total-value{font-size:38px!important;line-height:1.35;color:var(--dads-text)!important;font-weight:700;}
+.sales-unit-total{font-size:15px!important;color:var(--dads-muted)!important;}
+.expense-section{background:#fff!important;border:1px solid var(--dads-border)!important;border-radius:2px!important;box-shadow:none!important;padding:18px!important;margin-top:24px!important;}
+.section-title-row{border-bottom:1px solid #d4d8dc;padding-bottom:10px;margin-bottom:12px;}.section-title-row h2{margin:0;font-size:20px;}.expense-total strong{color:var(--dads-text);}
+.expense-warning{background:var(--dads-yellow)!important;border:1px solid #d8c36a!important;border-radius:2px!important;color:#3f3500!important;padding:12px!important;}
+.expense-row{border:0!important;border-bottom:1px solid #d4d8dc!important;border-radius:0!important;background:#fff!important;padding:12px 4px!important;}
+.expense-row:last-child{border-bottom:0!important;}.expense-item{font-weight:600;}.expense-buyer{color:var(--dads-muted);}.expense-amount{font-weight:700;}.expense-delete{color:var(--dads-danger)!important;min-width:40px;min-height:40px;}
+.member-list{gap:10px;}.member-btn{background:#fff!important;border:1px solid var(--dads-border)!important;border-radius:2px!important;box-shadow:none!important;color:var(--dads-text)!important;min-height:56px;font-weight:600;}.member-btn:hover{background:var(--dads-blue-pale)!important;}
+.member-grade{border-radius:2px!important;background:#eef1f4;color:#4a5056;}
+.register-area{background:#fff!important;border:1px solid var(--dads-border)!important;border-radius:2px!important;box-shadow:none!important;}
+.register-area button{background:var(--dads-blue)!important;border-radius:2px!important;min-height:52px;}
+.back{color:var(--dads-blue)!important;text-decoration:underline;text-underline-offset:2px;}.danger{color:var(--dads-danger)!important;background:#fff!important;border:1px solid #d7a6a1!important;border-radius:2px!important;}
+.personal-cell.selected{background:#e8f4ec!important;}.personal-cell.confirmed{background:#dcecf8!important;border:2px solid #5791bd!important;}
+.confirmed-note{background:#eef6fb!important;border:1px solid #a8c7dc;border-radius:2px!important;}
+.admin-panel{background:#fff!important;border:1px solid var(--dads-border)!important;border-radius:2px!important;box-shadow:none!important;}
+.candidate{border:1px solid var(--dads-border-strong)!important;border-radius:2px!important;background:#fff!important;min-height:44px;}.candidate.selected{background:var(--dads-blue-pale)!important;border:2px solid var(--dads-blue)!important;}
+.clear{border:1px solid var(--dads-border-strong)!important;border-radius:2px!important;background:#fff!important;min-height:44px;}
+.schedule-mobile{display:none;}
+.field-label{display:block;font-size:14px;font-weight:700;margin-bottom:6px;}
+.control-select{width:100%;min-height:48px;border:1px solid var(--dads-border-strong);border-radius:2px;background:#fff;padding:8px 12px;font-size:16px;color:var(--dads-text);}
+.mobile-shift-table-wrap{margin-top:14px;border:1px solid var(--dads-border);background:#fff;}
+.mobile-shift-table{width:100%;min-width:0;}
+.mobile-shift-table th:first-child,.mobile-shift-table td:first-child{width:43%;text-align:left;padding-left:12px;}
+.mobile-shift-table td{height:44px;}
+@media(max-width:600px){
+  .site-header{padding:12px 14px}.site-title{font-size:18px}.site-subtitle{font-size:11px}
+  .page{padding:18px 12px 32px;}h2{font-size:22px;}
+  nav button{font-size:14px;min-height:50px;}
+  .schedule-desktop{display:none!important;}.schedule-mobile{display:block;}
+  .schedule-help{font-size:13px;}
+  .date-tabs{position:static!important;background:transparent!important;padding:0!important;margin-bottom:16px;}
+  .date-tabs button{min-height:46px;}
+  .bulletin{margin-bottom:22px!important;}
+  .sales-grid{gap:7px!important;}.sales-card{padding:7px!important;}.sales-main{min-height:92px!important;font-size:19px!important;}.sales-count{font-size:18px;margin:8px 0 5px;}.sales-minus{width:52px!important;height:36px!important;}
+  .sales-total-value{font-size:34px!important;}
+  .expense-form{grid-template-columns:1fr 1fr!important;}.expense-form input:first-child{grid-column:1/-1;}.expense-add{grid-column:1/-1;}
+}
+</style>
+</head>
 <body>
-<header>one make たこ焼き</header><div id="syncStatus" style="background:#fff;padding:7px 12px;text-align:center;font-size:12px;color:#666;border-bottom:1px solid #ddd">Firebase接続中…</div>
+<header class="site-header"><div class="site-header-inner"><div class="brand-mark" aria-hidden="true">●</div><div><div class="site-title">one make たこ焼き</div><div class="site-subtitle">学祭スタッフ用シフト・売上管理</div></div></div></header><div id="syncStatus" style="background:#fff;padding:7px 12px;text-align:center;font-size:12px;color:#666;border-bottom:1px solid #ddd">Firebase接続中…</div>
 
 <nav>
   <button id="navSchedule" class="active" onclick="showPage('schedule')">シフト表</button>
@@ -337,8 +444,13 @@ th{background:#f5eee4;color:#5c564e}
   </div>
   <h2>シフト表</h2>
   <div class="date-tabs" id="scheduleDates"></div>
-  <p class="hint">横軸が担当場所、縦軸が時間です。登録された勤務可能時間を確認できます。</p>
-  <div class="table-wrap"><table id="scheduleTable"></table></div>
+  <p class="hint schedule-help">横軸が担当場所、縦軸が時間です。スマートフォンでは時間帯を選択して表示できます。</p>
+  <div class="table-wrap schedule-desktop"><table id="scheduleTable"></table></div>
+  <div class="schedule-mobile" aria-label="スマートフォン用シフト表">
+    <label class="field-label" for="mobileScheduleTime">時間帯</label>
+    <select id="mobileScheduleTime" class="control-select"></select>
+    <div class="mobile-shift-table-wrap"><table id="mobileScheduleTable"></table></div>
+  </div>
 </section>
 
 <section id="sales" class="page">
@@ -679,6 +791,40 @@ function renderSchedule(){
    tr.appendChild(td);
   });
   table.appendChild(tr);
+ });
+ renderMobileSchedule();
+}
+
+function renderMobileSchedule(){
+ const select=document.getElementById("mobileScheduleTime");
+ const table=document.getElementById("mobileScheduleTable");
+ if(!select || !table)return;
+ const previous=select.value;
+ select.innerHTML="";
+ TIMES.forEach((time,ti)=>{
+   const o=document.createElement("option");o.value=String(ti);o.textContent=time;select.appendChild(o);
+ });
+ const ti=previous!=="" && Number(previous)>=0 && Number(previous)<TIMES.length ? Number(previous) : 0;
+ select.value=String(ti);
+ select.onchange=()=>renderMobileSchedule();
+ table.className="mobile-shift-table";
+ table.innerHTML="<tr><th>担当場所</th><th>担当者</th></tr>";
+ POSITIONS.forEach(pos=>{
+   const tr=document.createElement("tr");
+   const tdPos=document.createElement("td");tdPos.textContent=pos;
+   const tdName=document.createElement("td");
+   const key=`${currentDate}|${ti}|${pos}`;
+   const name=assignments[key];
+   if(name){
+     tdName.textContent=name;
+     const g=memberGrades[name]||"";
+     tdName.className=g==="幹部"?"grade-exec-cell":"grade-"+g.replace("年","")+"-cell";
+     tdName.style.fontWeight="700";
+   }else{
+     tdName.textContent="—";
+     tdName.style.color="var(--dads-muted)";
+   }
+   tr.appendChild(tdPos);tr.appendChild(tdName);table.appendChild(tr);
  });
 }
 
