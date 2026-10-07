@@ -259,15 +259,71 @@ nav button.active{color:#111;border-bottom-color:#111;}
 .sales-total-value{font-size:30px;font-weight:700;margin-top:4px;}
 @media(max-width:600px){.sales-grid{gap:7px}.sales-card{padding:7px}.sales-main{min-height:82px;font-size:20px}.sales-count{font-size:20px;margin:9px 0 6px}.sales-minus{width:52px;height:34px}}
 </style>
-</head>
+<style>
+:root{--cream:#fffaf0;--paper:#fffdf8;--ink:#3d3a36;--muted:#7d776f;--line:#e8dfd2;--red:#e88778;--yellow:#f2c96b;--blue:#86b9cf;--green:#91c9a8;--lav:#b8a8c9;}
+*{box-sizing:border-box}
+html,body,button,input,select,textarea{font-family:"Kosugi Maru","Hiragino Maru Gothic ProN","Yu Gothic UI","Yu Gothic",Meiryo,sans-serif}
+body{background:var(--cream);color:var(--ink);line-height:1.5}
+header{background:#fffdf8;color:var(--ink);padding:15px 16px;font-size:20px;font-weight:700;border-bottom:1px solid var(--line);letter-spacing:.04em}
+nav{background:#fffdf8;border-bottom:1px solid var(--line);box-shadow:0 1px 0 rgba(80,60,40,.03)}
+nav button{color:var(--muted);padding:13px 6px;font-weight:700}
+nav button.active{color:var(--ink);border-bottom:3px solid var(--red);background:#fffaf0}
+.page{padding:14px;max-width:1100px}
+h2{font-size:21px;margin:8px 0 12px;font-weight:700}
+.hint,.small{color:var(--muted)}
+.date-tabs button{border:1px solid var(--line);border-radius:12px;background:var(--paper);color:var(--ink)}
+.date-tabs button.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.table-wrap{border:1px solid var(--line);border-radius:14px;box-shadow:none;background:var(--paper)}
+th,td{border-color:var(--line)}
+th{background:#f5eee4;color:#5c564e}
+.time{background:#faf4eb}
+.shift-cell.assigned,.admin-cell.assigned{font-weight:700}
+.member-btn,.admin-panel,.register-area,.bulletin,.sales-card,.sales-total,.expense-section{background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:0 2px 8px rgba(91,69,44,.05)}
+.member-btn{color:var(--ink)}
+.add-row input,.add-row select,.admin-grid select,.shortage-add input,.expense-form input{border:1px solid #dccfbe!important;border-radius:11px!important;background:#fffdf8}
+.primary,.add-row button{background:var(--red);border-radius:11px}
+.bulletin{padding:13px;margin-bottom:15px}
+.bulletin-title{color:#5c564e}
+.shortage-item{background:#fff4df;border:1px solid #efd9ae;border-radius:10px;color:#5c564e}
+.shortage-add button{background:var(--green);border-radius:10px}
+.sales-head h2{margin-bottom:2px}
+.sales-grid{gap:9px;margin-top:4px}
+.sales-card{padding:9px}
+.sales-main{border-radius:14px;min-height:92px;color:#fff;box-shadow:none}
+.sales-source{background:var(--red)}
+.sales-cheese{background:var(--yellow);color:#594b2c}
+.sales-oroshi{background:var(--blue)}
+.sales-count{color:var(--ink)}
+.sales-minus{border:1px solid var(--line);background:#fff;color:#777;border-radius:10px}
+.sales-total{margin-top:12px;padding:16px;background:#fff8e8;border-color:#efd9ae}
+.sales-total-label{color:#766b5b}
+.sales-total-value{font-size:32px;color:#5b4d37}
+.sales-unit-total{margin-top:2px;color:var(--muted);font-size:14px}
+.expense-section{margin-top:18px;padding:15px}
+.section-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.section-title-row h2{margin:0}
+.expense-total{font-size:13px;color:var(--muted)}
+.expense-total strong{font-size:17px;color:var(--ink)}
+.expense-warning{margin:10px 0;padding:11px 12px;background:#fff1e9;border:1px solid #f0cbbd;border-radius:11px;color:#76584f;font-size:13px}
+.expense-form{display:grid;grid-template-columns:1.5fr .8fr 1fr 110px;gap:7px;margin:10px 0 12px}
+.expense-form input{width:100%;padding:10px 11px;font-size:14px;min-width:0}
+.expense-add{border:0;border-radius:11px;background:var(--green);color:#fff;font-weight:700;cursor:pointer}
+.expense-list{display:flex;flex-direction:column;gap:7px}
+.expense-row{display:grid;grid-template-columns:1fr auto auto 34px;gap:10px;align-items:center;padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:#fffdf8}
+.expense-item{font-weight:700}.expense-buyer{font-size:12px;color:var(--muted)}.expense-amount{font-weight:700;white-space:nowrap}
+.expense-delete{border:0;background:transparent;color:#aaa;font-size:20px;cursor:pointer}
+.back{color:#6d655b}.danger{color:#b85c50;border-color:#efd0c8;background:#fff8f5}
+@media(max-width:700px){.expense-form{grid-template-columns:1fr 1fr}.expense-form input:first-child{grid-column:1/-1}.expense-add{grid-column:1/-1;min-height:44px}.expense-row{grid-template-columns:1fr auto 28px}.expense-buyer{grid-column:1}.expense-amount{grid-column:2;grid-row:1}.expense-delete{grid-column:3;grid-row:1}.section-title-row{align-items:flex-start}.sales-main{min-height:88px}}
+@media(max-width:600px){.sales-grid{gap:6px}.sales-card{padding:7px}.sales-main{font-size:20px}.sales-count{font-size:19px;margin:8px 0 5px}.sales-minus{width:50px;height:34px}}
+</style></head>
 <body>
 <header>one make たこ焼き</header><div id="syncStatus" style="background:#fff;padding:7px 12px;text-align:center;font-size:12px;color:#666;border-bottom:1px solid #ddd">Firebase接続中…</div>
 
 <nav>
   <button id="navSchedule" class="active" onclick="showPage('schedule')">シフト表</button>
-  <button id="navMembers" onclick="showPage('members')">メンバー</button>
   <button id="navSales" onclick="showPage('sales')">売上</button>
-<button id="navAdmin" onclick="showPage('admin')">管理者</button>
+  <button id="navMembers" onclick="showPage('members')">メンバー</button>
+  <button id="navAdmin" onclick="showPage('admin')">管理者</button>
 </nav>
 
 <section id="schedule" class="page active">
@@ -286,21 +342,23 @@ nav button.active{color:#111;border-bottom-color:#111;}
 </section>
 
 <section id="sales" class="page">
-  <h2>売上</h2>
-  <p class="hint">売れたら商品名のボタンを1回押してください。</p>
+  <div class="sales-head">
+    <h2>売上</h2>
+    <p class="hint">売れたら商品名のボタンを1回押してください。</p>
+  </div>
   <div class="sales-grid">
     <div class="sales-card">
-      <button class="sales-main" onclick="changeSale('source',1)">ソース</button>
+      <button class="sales-main sales-source" onclick="changeSale('source',1)">ソース</button>
       <div class="sales-count"><span id="sales-source">0</span>個</div>
       <button class="sales-minus" onclick="changeSale('source',-1)" aria-label="ソースを1個減らす">−</button>
     </div>
     <div class="sales-card">
-      <button class="sales-main" onclick="changeSale('cheese',1)">チーズ</button>
+      <button class="sales-main sales-cheese" onclick="changeSale('cheese',1)">チーズ</button>
       <div class="sales-count"><span id="sales-cheese">0</span>個</div>
       <button class="sales-minus" onclick="changeSale('cheese',-1)" aria-label="チーズを1個減らす">−</button>
     </div>
     <div class="sales-card">
-      <button class="sales-main" onclick="changeSale('oroshi',1)">おろし</button>
+      <button class="sales-main sales-oroshi" onclick="changeSale('oroshi',1)">おろし</button>
       <div class="sales-count"><span id="sales-oroshi">0</span>個</div>
       <button class="sales-minus" onclick="changeSale('oroshi',-1)" aria-label="おろしを1個減らす">−</button>
     </div>
@@ -308,6 +366,25 @@ nav button.active{color:#111;border-bottom-color:#111;}
   <div class="sales-total">
     <div class="sales-total-label">現在の総売り上げ</div>
     <div class="sales-total-value" id="sales-total">0円</div>
+    <div class="sales-unit-total" id="sales-unit-total">合計 0個</div>
+  </div>
+
+  <div class="expense-section">
+    <div class="section-title-row">
+      <h2>経費</h2>
+      <div class="expense-total">経費合計 <strong id="expense-total">0円</strong></div>
+    </div>
+    <div class="expense-warning">
+      <strong>レシート1枚につき1回だけ登録</strong><br>
+      1枚のレシートに複数の商品がある場合も、商品をまとめて合計金額を1回だけ登録してください。
+    </div>
+    <div class="expense-form">
+      <input id="expenseItem" placeholder="品名（例：紙皿・割り箸）">
+      <input id="expenseAmount" type="number" min="0" inputmode="numeric" placeholder="金額（円）">
+      <input id="expenseBuyer" placeholder="購入者名">
+      <button class="expense-add" onclick="addExpense()">経費を追加</button>
+    </div>
+    <div id="expenseList" class="expense-list"></div>
   </div>
 </section>
 
@@ -371,6 +448,7 @@ let memberGrades={};
 let bulletin="";
 let shortages=[];
 let sales={source:0,cheese:0,oroshi:0};
+let expenses=[];
 let currentDate=DATES[0];
 let currentMember=null;
 let adminSelectedMember="";
@@ -385,6 +463,7 @@ async function save(){
       bulletin: bulletin,
       shortages: shortages,
       sales: sales,
+      expenses: expenses,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     setSyncStatus("共有データに保存しました");
@@ -410,11 +489,11 @@ async function loadCloudData(){
       bulletin=typeof data.bulletin==="string"?data.bulletin:"";
   shortages=Array.isArray(data.shortages)?data.shortages:[];
   sales={source:Number(data.sales?.source)||0,cheese:Number(data.sales?.cheese)||0,oroshi:Number(data.sales?.oroshi)||0};
-      shortages=Array.isArray(data.shortages)?data.shortages:[];
-      sales={source:Number(data.sales?.source)||0,cheese:Number(data.sales?.cheese)||0,oroshi:Number(data.sales?.oroshi)||0};
+  expenses=Array.isArray(data.expenses)?data.expenses:[];
     }
     setSyncStatus("共有データに接続中");
     renderSales();
+    renderExpenses();
     renderSchedule();
     renderMembers();
     if(document.getElementById("admin").classList.contains("active")) renderAdmin();
@@ -433,8 +512,10 @@ db.collection("app").doc("state").onSnapshot(snap=>{
   bulletin=typeof data.bulletin==="string"?data.bulletin:"";
   shortages=Array.isArray(data.shortages)?data.shortages:[];
   sales={source:Number(data.sales?.source)||0,cheese:Number(data.sales?.cheese)||0,oroshi:Number(data.sales?.oroshi)||0};
+  expenses=Array.isArray(data.expenses)?data.expenses:[];
   renderBulletin();
   renderSales();
+  renderExpenses();
   renderSchedule();
   renderMembers();
   if(document.getElementById("admin").classList.contains("active")) renderAdmin();
@@ -513,9 +594,12 @@ function renderSales(){
    const el=document.getElementById(`sales-${k}`);
    if(el)el.textContent=Number(sales[k])||0;
  });
- const total=keys.reduce((sum,k)=>sum+(Number(sales[k])||0),0)*300;
+ const units=keys.reduce((sum,k)=>sum+(Number(sales[k])||0),0);
+ const total=units*300;
  const totalEl=document.getElementById("sales-total");
+ const unitEl=document.getElementById("sales-unit-total");
  if(totalEl)totalEl.textContent=total.toLocaleString("ja-JP")+"円";
+ if(unitEl)unitEl.textContent=`合計 ${units.toLocaleString("ja-JP")}個`;
 }
 async function changeSale(key,delta){
  const valid=["source","cheese","oroshi"];
@@ -533,6 +617,46 @@ async function changeSale(key,delta){
    console.error(e);
    setSyncStatus("売上の更新に失敗しました",true);
  }
+}
+
+function renderExpenses(){
+ const list=document.getElementById("expenseList");
+ const totalEl=document.getElementById("expense-total");
+ if(!list)return;
+ list.innerHTML="";
+ let total=0;
+ if(!expenses.length){
+   list.innerHTML='<div class="small">まだ経費は登録されていません。</div>';
+ }else{
+   expenses.forEach((e,index)=>{
+     const row=document.createElement("div"); row.className="expense-row";
+     row.innerHTML=`<div><div class="expense-item">${escapeHtml(e.item)}</div><div class="expense-buyer">購入者：${escapeHtml(e.buyer)}</div></div><div class="expense-amount">${Number(e.amount||0).toLocaleString("ja-JP")}円</div><button class="expense-delete" aria-label="この経費を削除">×</button>`;
+     row.querySelector("button").onclick=()=>removeExpense(index);
+     list.appendChild(row);
+     total+=Number(e.amount)||0;
+   });
+ }
+ if(totalEl)totalEl.textContent=total.toLocaleString("ja-JP")+"円";
+}
+async function addExpense(){
+ const item=document.getElementById("expenseItem").value.trim();
+ const amount=Math.floor(Number(document.getElementById("expenseAmount").value));
+ const buyer=document.getElementById("expenseBuyer").value.trim();
+ if(!item||!Number.isFinite(amount)||amount<0||!buyer){alert("品名・金額・購入者名を入力してください。");return;}
+ if(!confirm("このレシートの内容を1件の経費として登録しますか？\n\n※同じレシートを複数回登録しないでください。"))return;
+ expenses.push({item,amount,buyer});
+ document.getElementById("expenseItem").value="";
+ document.getElementById("expenseAmount").value="";
+ document.getElementById("expenseBuyer").value="";
+ renderExpenses();
+ await save();
+}
+async function removeExpense(index){
+ if(index<0||index>=expenses.length)return;
+ if(!confirm("この経費を削除しますか？"))return;
+ expenses.splice(index,1);
+ renderExpenses();
+ await save();
 }
 
 function renderSchedule(){
@@ -841,6 +965,7 @@ function renderAdminTable(){
 
 renderBulletin();
 renderSales();
+renderExpenses();
 renderSchedule();
 renderMembers();
 loadCloudData();
