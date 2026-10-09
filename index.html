@@ -464,6 +464,32 @@ th{background:#eef1f4;color:#1a1a1a;font-weight:700;}
 }
 </style>
 
+
+<style>
+.materials-total{display:flex;justify-content:flex-end;margin:10px 0 12px}
+.materials-total .feature-stat{min-width:180px}
+.materials-table-wrap{overflow-x:auto;border:1px solid #d7dde2;border-radius:4px;background:#fff}
+.materials-table{min-width:570px}
+.materials-grid{display:grid;grid-template-columns:minmax(135px,1.25fr) minmax(125px,1fr) minmax(125px,1fr) 82px;gap:8px;align-items:center;padding:10px 12px}
+.materials-grid-head{background:#f2f5f7;font-size:13px;font-weight:700;border-bottom:1px solid #d7dde2}
+.materials-grid-row{border-bottom:1px solid #e4e8eb}
+.materials-grid-row:last-child{border-bottom:0}
+.materials-name{font-weight:700;overflow-wrap:anywhere}
+.materials-unit{font-size:12px;color:#5b6570;font-weight:400}
+.materials-grid input{width:100%;min-width:0;box-sizing:border-box;padding:10px 8px;border:1px solid #b8c2cc;border-radius:4px;font-size:15px}
+.materials-add-btn{width:100%;padding:9px 5px;min-height:40px}
+.materials-history{grid-column:1/-1;background:#fafbfc;padding:7px 9px;border-radius:4px}
+.materials-history .feature-row{font-size:13px}
+.add-material-row{margin-top:10px;width:100%;min-height:44px}
+.materials-row-tools{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.materials-row-tools button{font-size:12px;padding:4px 7px;min-height:28px}
+@media(max-width:600px){
+  .materials-grid{padding:8px;gap:6px}
+  .materials-grid input{font-size:14px;padding:9px 6px}
+  .materials-total .feature-stat{width:100%}
+}
+</style>
+
 </head>
 <body>
 <header class="site-header"><div class="site-header-inner"><div class="brand-mark" aria-hidden="true">●</div><div><div class="site-title">one make たこ焼き</div><div class="site-subtitle">学祭スタッフ用シフト・売上管理</div></div></div></header><div id="syncStatus" style="background:#fff;padding:7px 12px;text-align:center;font-size:12px;color:#666;border-bottom:1px solid #ddd">Firebase接続中…</div>
@@ -527,19 +553,25 @@ th{background:#eef1f4;color:#1a1a1a;font-weight:700;}
   <section class="feature-section" id="materialsSection">
     <h2>材料・購入記録</h2>
     <p class="hint">材料ごとの購入数量・金額・購入履歴を記録します。レシート精算とは別集計です。同じ購入を両方に登録した場合、金額を二重計上しないよう注意してください。</p>
-    <div class="feature-form">
-      <input id="materialName" placeholder="材料名（例：たこ）" maxlength="80">
-      <input id="materialUnit" placeholder="単位（例：kg、袋、個）" maxlength="20">
-      <button class="feature-btn feature-btn-primary wide" onclick="addMaterial()">材料を追加</button>
+    <div id="materialsSummary" class="materials-total"></div>
+    <div class="materials-table-wrap">
+      <div class="materials-table" role="table" aria-label="材料購入記録">
+        <div class="materials-grid materials-grid-head" role="row">
+          <div role="columnheader">材料</div>
+          <div role="columnheader">購入数量</div>
+          <div role="columnheader">金額（円）</div>
+          <div role="columnheader">追加</div>
+        </div>
+        <div id="materialsList"></div>
+      </div>
     </div>
-    <div class="quick-materials" id="quickMaterials"></div>
-    <div id="materialsSummary" class="feature-summary"></div>
-    <div id="materialsList"></div><p id="materialsStatus" class="hint"></p>
+    <button class="feature-btn feature-btn-primary add-material-row" onclick="addMaterial()">＋ 材料を追加</button>
+    <p id="materialsStatus" class="hint"></p>
   </section>
 
   <section class="feature-section" id="receiptsSection">
     <h2>レシート・立替精算</h2>
-    <p class="feature-note"><strong>レシート1枚につき1回だけ登録してください。</strong><br>レシートに複数の商品が載っていても、合計金額を1件として登録します。購入者名・金額・画像を記録し、返金状況を管理します。</p>
+    <p class="feature-note"><strong>レシート1枚につき1回だけ登録してください。</strong><br>レシートに複数の商品が載っていても、合計金額を1件として登録します。購入者名・金額を記録し、返金状況を管理します。レシート原本は別途保管してください。</p>
     <div class="feature-form">
       <input id="receiptBuyer" placeholder="購入者名" maxlength="80">
       <input id="receiptAmount" type="number" min="1" step="1" inputmode="numeric" placeholder="金額（円）">
@@ -830,7 +862,7 @@ async function removeExpense(index){
 
 
 // ===== 材料・購入履歴 =====
-const STARTER_MATERIALS=["たこ","小麦粉","おろしポン酢","ソース","キャベツ","卵","チーズ明太","天かす","青ねぎ","かつお節","青のり"];
+const STARTER_MATERIALS=[{name:"たこ",unit:"kg",id:"starter_tako"},{name:"ソース",unit:"本",id:"starter_sauce"},{name:"マヨネーズ",unit:"本",id:"starter_mayo"},{name:"舟",unit:"枚",id:"starter_boat"}];
 let materialsListenerStarted=false;
 let receiptsListenerStarted=false;
 let materialsUnsub=null;
@@ -841,9 +873,10 @@ function startReceiptDataListeners(){
   authReady.then(()=>{
     if(!materialsListenerStarted){
       materialsListenerStarted=true;
-      materialsUnsub=db.collection("materials").orderBy("name").onSnapshot(snap=>{
+      materialsUnsub=db.collection("materials").onSnapshot(snap=>{
         materials=snap.docs.map(d=>({id:d.id,...d.data()}));
         renderMaterials();
+        ensureDefaultMaterials();
       },err=>{
         console.error(err);
         setFeatureMessage("materialsStatus","材料データを読み込めません。Firebaseの設定を確認してください。",true);
@@ -874,28 +907,38 @@ function setFeatureMessage(id,message,error=false){
 function yen(value){return (Number(value)||0).toLocaleString("ja-JP")+"円";}
 function safeText(value){return escapeHtml(String(value??""));}
 
-function renderQuickMaterials(){
-  const box=document.getElementById("quickMaterials");
-  if(!box)return;
-  box.innerHTML="<span class='feature-subtext'>候補：</span>";
-  STARTER_MATERIALS.filter(n=>!materials.some(m=>m.name===n)).forEach(name=>{
-    const b=document.createElement("button");
-    b.className="feature-btn";
-    b.textContent="+ "+name;
-    b.onclick=()=>{document.getElementById("materialName").value=name;document.getElementById("materialUnit").focus();};
-    box.appendChild(b);
-  });
-}
-async function addMaterial(){
-  const name=document.getElementById("materialName").value.trim();
-  const unit=document.getElementById("materialUnit").value.trim();
-  if(!name){alert("材料名を入力してください。");return;}
-  if(materials.some(m=>String(m.name).toLowerCase()===name.toLowerCase())){alert("同じ名前の材料がすでに登録されています。");return;}
+let defaultMaterialsSeedStarted=false;
+async function ensureDefaultMaterials(){
+  if(defaultMaterialsSeedStarted)return;
+  defaultMaterialsSeedStarted=true;
   try{
     await authReady;
-    await db.collection("materials").add({name,unit:unit||"個",purchases:[],createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-    document.getElementById("materialName").value="";
-    document.getElementById("materialUnit").value="";
+    const existingNames=new Set(materials.map(m=>String(m.name||"").toLowerCase()));
+    for(const item of STARTER_MATERIALS){
+      if(existingNames.has(item.name.toLowerCase()))continue;
+      const ref=db.collection("materials").doc(item.id);
+      const snap=await ref.get();
+      if(!snap.exists){
+        await ref.set({name:item.name,unit:item.unit,purchases:[],createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+      }
+    }
+  }catch(e){
+    console.error("Could not seed default materials:",e);
+    // If the defaults could not be added, the user can add them manually.
+    defaultMaterialsSeedStarted=false;
+  }
+}
+async function addMaterial(){
+  const name=prompt("追加する材料名を入力してください（例：青のり）");
+  if(name===null)return;
+  const clean=name.trim();
+  if(!clean){alert("材料名を入力してください。");return;}
+  if(materials.some(m=>String(m.name).toLowerCase()===clean.toLowerCase())){alert("同じ名前の材料がすでに登録されています。");return;}
+  const unit=prompt("単位を入力してください（例：kg、本、袋、枚、個）","個");
+  if(unit===null)return;
+  try{
+    await authReady;
+    await db.collection("materials").add({name:clean,unit:unit.trim()||"個",purchases:[],createdAt:firebase.firestore.FieldValue.serverTimestamp()});
   }catch(e){console.error(e);alert("材料を追加できませんでした。Firebaseの設定を確認してください。\n"+e.message);}
 }
 async function renameMaterial(id,oldName,oldUnit){
@@ -914,7 +957,7 @@ async function addMaterialPurchase(id){
   const card=document.querySelector(`[data-material-id="${CSS.escape(id)}"]`);
   const qty=Number(card?.querySelector(".purchase-qty")?.value);
   const amount=Math.floor(Number(card?.querySelector(".purchase-amount")?.value));
-  const date=card?.querySelector(".purchase-date")?.value||new Date().toISOString().slice(0,10);
+  const date=new Date().toISOString().slice(0,10);
   if(!Number.isFinite(qty)||qty<=0||!Number.isFinite(amount)||amount<0){alert("購入数量は0より大きく、金額は0円以上で入力してください。");return;}
   const purchase={id:crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2),qty,amount,date,createdAt:new Date().toISOString()};
   try{
@@ -948,33 +991,60 @@ function renderMaterials(){
   const list=document.getElementById("materialsList");
   const summary=document.getElementById("materialsSummary");
   if(!list||!summary)return;
-  renderQuickMaterials();
-  let totalSpend=0,totalQty=0,purchaseCount=0;
-  materials.forEach(m=>(Array.isArray(m.purchases)?m.purchases:[]).forEach(p=>{totalSpend+=Number(p.amount)||0;totalQty+=Number(p.qty)||0;purchaseCount++;}));
-  summary.innerHTML=`<div class="feature-stat"><small>登録材料</small><strong>${materials.length}種類</strong></div><div class="feature-stat"><small>購入履歴</small><strong>${purchaseCount}件</strong></div><div class="feature-stat"><small>材料購入額合計</small><strong>${yen(totalSpend)}</strong></div>`;
+
+  const totalSpend=materials.reduce((sum,m)=>sum+(Array.isArray(m.purchases)?m.purchases.reduce((a,p)=>a+(Number(p.amount)||0),0):0),0);
+  summary.innerHTML=`<div class="feature-stat"><small>材料購入額合計</small><strong>${yen(totalSpend)}</strong></div>`;
+
+  const preferred=STARTER_MATERIALS.map(x=>x.name.toLowerCase());
+  const ordered=materials.slice().sort((a,b)=>{
+    const ai=preferred.indexOf(String(a.name||"").toLowerCase());
+    const bi=preferred.indexOf(String(b.name||"").toLowerCase());
+    if(ai!==-1||bi!==-1)return (ai===-1?999:ai)-(bi===-1?999:bi);
+    return String(a.name||"").localeCompare(String(b.name||""),"ja");
+  });
   list.innerHTML="";
-  if(!materials.length){list.innerHTML="<p class='hint'>材料がまだありません。上の候補ボタンから選ぶか、材料名を入力して追加してください。</p>";return;}
-  materials.forEach(m=>{
+  if(!ordered.length){
+    list.innerHTML="<div class='materials-grid materials-grid-row'><div class='feature-subtext'>材料がありません</div><div></div><div></div><div></div></div>";
+    return;
+  }
+
+  ordered.forEach(m=>{
     const purchases=Array.isArray(m.purchases)?m.purchases:[];
     const qty=purchases.reduce((a,p)=>a+(Number(p.qty)||0),0);
     const amount=purchases.reduce((a,p)=>a+(Number(p.amount)||0),0);
-    const card=document.createElement("div");card.className="material-card";card.dataset.materialId=m.id;
-    card.innerHTML=`<div class="material-card-head"><div><h3>${safeText(m.name)}</h3><div class="feature-subtext">購入合計：${qty.toLocaleString("ja-JP")} ${safeText(m.unit||"個")} ／ ${yen(amount)}</div></div><div class="feature-actions"><button class="feature-btn" data-action="edit">編集</button><button class="feature-btn feature-btn-danger" data-action="delete">削除</button></div></div>
-    <div class="purchase-form"><input class="purchase-qty" type="number" min="0.001" step="any" placeholder="数量（${safeText(m.unit||"個")}）"><input class="purchase-amount" type="number" min="0" step="1" placeholder="金額（円）"><input class="purchase-date" type="date" value="${new Date().toISOString().slice(0,10)}"><button class="feature-btn feature-btn-primary" data-action="purchase">購入を記録</button></div>
-    <div class="purchase-history"></div>`;
-    card.querySelector('[data-action="edit"]').onclick=()=>renameMaterial(m.id,m.name,m.unit||"個");
-    card.querySelector('[data-action="delete"]').onclick=()=>deleteMaterial(m.id,m.name);
-    card.querySelector('[data-action="purchase"]').onclick=()=>addMaterialPurchase(m.id);
-    const history=card.querySelector(".purchase-history");
-    if(!purchases.length)history.innerHTML="<div class='feature-subtext'>購入履歴はまだありません。</div>";
-    else purchases.slice().sort((a,b)=>String(b.date||"").localeCompare(String(a.date||""))).forEach(p=>{
-      const row=document.createElement("div");row.className="feature-row";
-      const unitPrice=Number(p.qty)>0?Math.round((Number(p.amount)||0)/Number(p.qty)):0;
-      row.innerHTML=`<div><strong>${safeText(p.date||"日付なし")}</strong><div>${Number(p.qty).toLocaleString("ja-JP")} ${safeText(m.unit||"個")} ・ ${yen(p.amount)} <span class="feature-subtext">（単位あたり約${yen(unitPrice)}）</span></div></div><button class="feature-btn feature-btn-danger">削除</button>`;
-      row.querySelector("button").onclick=()=>deleteMaterialPurchase(m.id,p.id);
-      history.appendChild(row);
-    });
-    list.appendChild(card);
+    const row=document.createElement("div");
+    row.className="materials-grid materials-grid-row";
+    row.dataset.materialId=m.id;
+    row.innerHTML=`
+      <div>
+        <div class="materials-name">${safeText(m.name)}</div>
+        <div class="materials-unit">合計 ${qty.toLocaleString("ja-JP")} ${safeText(m.unit||"個")} / ${yen(amount)}</div>
+        <div class="materials-row-tools">
+          <button class="feature-btn" data-action="edit">編集</button>
+          <button class="feature-btn feature-btn-danger" data-action="delete">削除</button>
+        </div>
+      </div>
+      <div><input class="purchase-qty" type="number" min="0.001" step="any" inputmode="decimal" aria-label="${safeText(m.name)}の購入数量" placeholder="${safeText(m.unit||"個")}"></div>
+      <div><input class="purchase-amount" type="number" min="0" step="1" inputmode="numeric" aria-label="${safeText(m.name)}の購入金額" placeholder="円"></div>
+      <div><button class="feature-btn feature-btn-primary materials-add-btn" data-action="purchase">追加</button></div>
+      <div class="materials-history"></div>`;
+    row.querySelector('[data-action="edit"]').onclick=()=>renameMaterial(m.id,m.name,m.unit||"個");
+    row.querySelector('[data-action="delete"]').onclick=()=>deleteMaterial(m.id,m.name);
+    row.querySelector('[data-action="purchase"]').onclick=()=>addMaterialPurchase(m.id);
+    const history=row.querySelector(".materials-history");
+    if(!purchases.length){
+      history.innerHTML="<div class='feature-subtext'>購入履歴なし</div>";
+    }else{
+      history.innerHTML="<strong>購入履歴</strong>";
+      purchases.slice().sort((a,b)=>String(b.date||"").localeCompare(String(a.date||""))).forEach(p=>{
+        const item=document.createElement("div");item.className="feature-row";
+        const unitPrice=Number(p.qty)>0?Math.round((Number(p.amount)||0)/Number(p.qty)):0;
+        item.innerHTML=`<div>${safeText(p.date||"日付なし")}：${Number(p.qty).toLocaleString("ja-JP")} ${safeText(m.unit||"個")} ・ ${yen(p.amount)} <span class="feature-subtext">（単位あたり約${yen(unitPrice)}）</span></div><button class="feature-btn feature-btn-danger">削除</button>`;
+        item.querySelector("button").onclick=()=>deleteMaterialPurchase(m.id,p.id);
+        history.appendChild(item);
+      });
+    }
+    list.appendChild(row);
   });
 }
 
