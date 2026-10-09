@@ -66,10 +66,9 @@ th{background:#eee;position:sticky;top:0;z-index:2}
   border:2px solid #4d86c5;
   font-weight:800;
 }
-.personal-cell.confirmed::after{
-  content:"シフト確定";
-  font-size:12px;
-}
+.personal-cell.confirmed::after{content:none}
+.personal-role{display:block;font-size:13px;font-weight:800;line-height:1.25;overflow-wrap:anywhere}
+.personal-coworkers{display:block;margin-top:3px;font-size:10px;line-height:1.25;font-weight:400;color:#334155;overflow-wrap:anywhere}
 .personal-cell.selected:not(.confirmed)::after{
   content:"勤務可";
   font-size:12px;
@@ -470,12 +469,23 @@ th{background:#eef1f4;color:#1a1a1a;font-weight:700;}
 .materials-total .feature-stat{min-width:180px}
 .materials-table-wrap{overflow-x:auto;border:1px solid #d7dde2;border-radius:4px;background:#fff}
 .materials-table{min-width:570px}
-.materials-grid{display:grid;grid-template-columns:minmax(135px,1.25fr) minmax(125px,1fr) minmax(125px,1fr) 82px;gap:8px;align-items:center;padding:10px 12px}
+.materials-grid{display:grid;grid-template-columns:minmax(125px,1.25fr) minmax(95px,1fr) minmax(100px,1fr) 82px;gap:8px;align-items:center;padding:10px 12px}
 .materials-grid-head{background:#f2f5f7;font-size:13px;font-weight:700;border-bottom:1px solid #d7dde2}
 .materials-grid-row{border-bottom:1px solid #e4e8eb}
 .materials-grid-row:last-child{border-bottom:0}
 .materials-name{font-weight:700;overflow-wrap:anywhere}
 .materials-unit{font-size:12px;color:#5b6570;font-weight:400}
+.materials-metric{font-size:14px;font-weight:700;overflow-wrap:anywhere}
+.materials-metric small{display:block;font-size:11px;color:#5b6570;font-weight:400;margin-bottom:2px}
+.purchase-modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px}
+.purchase-modal-backdrop.open{display:flex}
+.purchase-modal{background:#fff;border-radius:12px;padding:20px;width:min(100%,390px);box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.purchase-modal h3{margin:0 0 6px;font-size:19px}
+.purchase-modal .hint{margin:0 0 16px}
+.purchase-modal label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}
+.purchase-modal input{width:100%;box-sizing:border-box;padding:11px;border:1px solid #b8c2cc;border-radius:6px;font-size:16px}
+.purchase-modal-actions{display:flex;gap:8px;margin-top:18px}
+.purchase-modal-actions button{flex:1}
 .materials-grid input{width:100%;min-width:0;box-sizing:border-box;padding:10px 8px;border:1px solid #b8c2cc;border-radius:4px;font-size:15px}
 .materials-add-btn{width:100%;padding:9px 5px;min-height:40px}
 .materials-history{grid-column:1/-1;background:#fafbfc;padding:7px 9px;border-radius:4px}
@@ -552,21 +562,35 @@ th{background:#eef1f4;color:#1a1a1a;font-weight:700;}
 
   <section class="feature-section" id="materialsSection">
     <h2>材料・購入記録</h2>
-    <p class="hint">材料ごとの購入数量・金額・購入履歴を記録します。レシート精算とは別集計です。同じ購入を両方に登録した場合、金額を二重計上しないよう注意してください。</p>
+    <p class="hint">材料ごとの購入量・購入金額の合計を確認できます。「追加」から購入量と金額を入力してください。レシート精算とは別集計です。</p>
     <div id="materialsSummary" class="materials-total"></div>
     <div class="materials-table-wrap">
       <div class="materials-table" role="table" aria-label="材料購入記録">
         <div class="materials-grid materials-grid-head" role="row">
           <div role="columnheader">材料</div>
-          <div role="columnheader">購入数量</div>
-          <div role="columnheader">金額（円）</div>
-          <div role="columnheader">追加</div>
+          <div role="columnheader">購入量 合計</div>
+          <div role="columnheader">購入金額 合計</div>
+          <div role="columnheader">操作</div>
         </div>
         <div id="materialsList"></div>
       </div>
     </div>
     <button class="feature-btn feature-btn-primary add-material-row" onclick="addMaterial()">＋ 材料を追加</button>
     <p id="materialsStatus" class="hint"></p>
+    <div id="purchaseModalBackdrop" class="purchase-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="purchaseModalTitle">
+      <div class="purchase-modal">
+        <h3 id="purchaseModalTitle">購入記録を追加</h3>
+        <p id="purchaseModalMaterial" class="hint"></p>
+        <label for="purchaseModalQty">購入数量</label>
+        <input id="purchaseModalQty" type="number" min="0.001" step="any" inputmode="decimal" placeholder="例：2">
+        <label for="purchaseModalAmount">購入金額（円）</label>
+        <input id="purchaseModalAmount" type="number" min="0" step="1" inputmode="numeric" placeholder="例：980">
+        <div class="purchase-modal-actions">
+          <button type="button" class="feature-btn" id="purchaseModalCancel">キャンセル</button>
+          <button type="button" class="feature-btn feature-btn-primary" id="purchaseModalSave">購入記録を追加</button>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section class="feature-section" id="receiptsSection">
@@ -952,13 +976,33 @@ async function renameMaterial(id,oldName,oldUnit){
   try{await db.collection("materials").doc(id).update({name:clean,unit:unit.trim()||"個"});}
   catch(e){alert("変更に失敗しました。\n"+e.message);}
 }
-async function addMaterialPurchase(id){
+let activePurchaseMaterialId=null;
+function openPurchaseModal(id){
   const mat=materials.find(m=>m.id===id);if(!mat)return;
-  const card=document.querySelector(`[data-material-id="${CSS.escape(id)}"]`);
-  const qty=Number(card?.querySelector(".purchase-qty")?.value);
-  const amount=Math.floor(Number(card?.querySelector(".purchase-amount")?.value));
+  activePurchaseMaterialId=id;
+  document.getElementById("purchaseModalTitle").textContent="購入記録を追加";
+  document.getElementById("purchaseModalMaterial").textContent=`${mat.name}（単位：${mat.unit||"個"}）`;
+  document.getElementById("purchaseModalQty").value="";
+  document.getElementById("purchaseModalQty").placeholder=`数量（${mat.unit||"個"}）`;
+  document.getElementById("purchaseModalAmount").value="";
+  document.getElementById("purchaseModalBackdrop").classList.add("open");
+  setTimeout(()=>document.getElementById("purchaseModalQty").focus(),0);
+}
+function closePurchaseModal(){
+  document.getElementById("purchaseModalBackdrop").classList.remove("open");
+  activePurchaseMaterialId=null;
+}
+async function addMaterialPurchase(){
+  const id=activePurchaseMaterialId;
+  const mat=materials.find(m=>m.id===id);if(!mat)return;
+  const qtyRaw=document.getElementById("purchaseModalQty").value;
+  const amountRaw=document.getElementById("purchaseModalAmount").value;
+  const qty=Number(qtyRaw);
+  const amount=Math.floor(Number(amountRaw));
+  if(qtyRaw.trim()===""||amountRaw.trim()===""||!Number.isFinite(qty)||qty<=0||!Number.isFinite(amount)||amount<0){
+    alert("購入数量は0より大きく、金額は0円以上で入力してください。");return;
+  }
   const date=new Date().toISOString().slice(0,10);
-  if(!Number.isFinite(qty)||qty<=0||!Number.isFinite(amount)||amount<0){alert("購入数量は0より大きく、金額は0円以上で入力してください。");return;}
   const purchase={id:crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2),qty,amount,date,createdAt:new Date().toISOString()};
   try{
     await authReady;
@@ -969,6 +1013,7 @@ async function addMaterialPurchase(id){
       const list=Array.isArray(snap.data().purchases)?snap.data().purchases:[];
       tx.update(ref,{purchases:[...list,purchase]});
     });
+    closePurchaseModal();
   }catch(e){console.error(e);alert("購入記録を保存できませんでした。\n"+e.message);}
 }
 async function deleteMaterialPurchase(materialId,purchaseId){
@@ -1018,19 +1063,18 @@ function renderMaterials(){
     row.innerHTML=`
       <div>
         <div class="materials-name">${safeText(m.name)}</div>
-        <div class="materials-unit">合計 ${qty.toLocaleString("ja-JP")} ${safeText(m.unit||"個")} / ${yen(amount)}</div>
         <div class="materials-row-tools">
           <button class="feature-btn" data-action="edit">編集</button>
           <button class="feature-btn feature-btn-danger" data-action="delete">削除</button>
         </div>
       </div>
-      <div><input class="purchase-qty" type="number" min="0.001" step="any" inputmode="decimal" aria-label="${safeText(m.name)}の購入数量" placeholder="${safeText(m.unit||"個")}"></div>
-      <div><input class="purchase-amount" type="number" min="0" step="1" inputmode="numeric" aria-label="${safeText(m.name)}の購入金額" placeholder="円"></div>
+      <div class="materials-metric"><small>購入量</small>${qty.toLocaleString("ja-JP")} ${safeText(m.unit||"個")}</div>
+      <div class="materials-metric"><small>購入金額</small>${yen(amount)}</div>
       <div><button class="feature-btn feature-btn-primary materials-add-btn" data-action="purchase">追加</button></div>
       <div class="materials-history"></div>`;
     row.querySelector('[data-action="edit"]').onclick=()=>renameMaterial(m.id,m.name,m.unit||"個");
     row.querySelector('[data-action="delete"]').onclick=()=>deleteMaterial(m.id,m.name);
-    row.querySelector('[data-action="purchase"]').onclick=()=>addMaterialPurchase(m.id);
+    row.querySelector('[data-action="purchase"]').onclick=()=>openPurchaseModal(m.id);
     const history=row.querySelector(".materials-history");
     if(!purchases.length){
       history.innerHTML="<div class='feature-subtext'>購入履歴なし</div>";
@@ -1242,8 +1286,14 @@ function renderPersonalTable(){
 
    if(assignedPositions.length){
      td.classList.add("confirmed");
-     td.title=`シフト確定：${assignedPositions.join("・")}`;
      td.dataset.confirmed="1";
+     const role=assignedPositions[0];
+     const roleGroup=role.replace(/\\d+$/,"");
+     const sameRolePositions=POSITIONS.filter(pos=>pos.replace(/\\d+$/,"")===roleGroup);
+     const coworkers=members.filter(name=>name!==currentMember && sameRolePositions.some(pos=>assignments[`${d}|${ti}|${pos}`]===name));
+     td.innerHTML=`<span class="personal-role">${safeText(roleGroup)}</span>`+
+       (coworkers.length?`<span class="personal-coworkers">${coworkers.map(safeText).join("、")}</span>`:"");
+     td.title=`担当：${roleGroup}`+(coworkers.length?`\\n同じ時間・役職：${coworkers.join("、")}`:"");
    }else{
      td.onclick=()=>td.classList.toggle("selected");
    }
@@ -1268,8 +1318,8 @@ function renderPersonalTable(){
  }).length;
 
  note.textContent=confirmedCount
-   ? `🔵 青色の「シフト確定」は、管理者があなたを実際の担当として決定した時間です。`
-   : `🔵 管理者がシフトを確定すると、この画面に「シフト確定」と表示されます。`;
+   ? `🔵 青色の枠には、確定した担当役職と、同じ時間・役職で働くメンバーが表示されます。`
+   : `🔵 管理者がシフトを確定すると、担当役職と同じ時間・役職で働くメンバーが表示されます。`;
 }
 
 function registerAvailability(){
@@ -1455,6 +1505,16 @@ renderSchedule();
 renderMembers();
 loadCloudData();
 startReceiptDataListeners();
+
+document.addEventListener("DOMContentLoaded",()=>{
+  const cancel=document.getElementById("purchaseModalCancel");
+  const save=document.getElementById("purchaseModalSave");
+  const backdrop=document.getElementById("purchaseModalBackdrop");
+  if(cancel)cancel.addEventListener("click",closePurchaseModal);
+  if(save)save.addEventListener("click",addMaterialPurchase);
+  if(backdrop)backdrop.addEventListener("click",e=>{if(e.target===backdrop)closePurchaseModal();});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")closePurchaseModal();});
+});
 </script>
 
 <section id="admin" class="page">
