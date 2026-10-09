@@ -422,6 +422,48 @@ th{background:#eef1f4;color:#1a1a1a;font-weight:700;}
   .expense-form{grid-template-columns:1fr 1fr!important;}.expense-form input:first-child{grid-column:1/-1;}.expense-add{grid-column:1/-1;}
 }
 </style>
+
+<style>
+/* 材料・レシート機能 */
+.feature-section{margin-top:24px;padding-top:20px;border-top:2px solid var(--dads-border,#ddd)}
+.feature-section h2{margin-bottom:8px}
+.feature-note{font-size:13px;line-height:1.6;color:#555;background:#f6f8fa;border-left:4px solid #8a9aa8;padding:10px 12px;margin:10px 0 14px}
+.feature-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+.feature-form input,.feature-form select{width:100%;min-width:0;box-sizing:border-box;padding:12px;border:1px solid #b8c2cc;border-radius:4px;background:#fff;font-size:16px}
+.feature-form button{min-height:44px}
+.feature-form .wide{grid-column:1/-1}
+.feature-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+.feature-stat{border:1px solid #d7dde2;background:#fff;padding:12px;border-radius:4px}
+.feature-stat small{display:block;color:#555;font-size:12px}
+.feature-stat strong{display:block;font-size:19px;margin-top:5px;overflow-wrap:anywhere}
+.material-card,.receipt-card{border:1px solid #d7dde2;background:#fff;padding:12px;margin:10px 0;border-radius:4px}
+.material-card-head,.receipt-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.material-card h3,.receipt-card h3{margin:0;font-size:17px}
+.feature-subtext{font-size:13px;color:#555;margin-top:4px}
+.purchase-form{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:7px;margin-top:10px}
+.purchase-form input{min-width:0;width:100%;box-sizing:border-box;padding:10px;border:1px solid #b8c2cc;border-radius:4px}
+.feature-btn{border:1px solid #8795a1;background:#fff;padding:8px 10px;border-radius:4px;min-height:38px;cursor:pointer}
+.feature-btn-primary{background:#005ea8;color:#fff;border-color:#005ea8}
+.feature-btn-danger{color:#b42318;border-color:#b42318}
+.feature-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid #e6e9ec;font-size:14px}
+.feature-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.receipt-image{display:block;max-width:100%;max-height:70vh;margin-top:10px;border:1px solid #ddd}
+.receipt-person-summary{background:#f7f9fb;padding:10px;margin:8px 0;border:1px solid #d7dde2}
+.receipt-status-paid{color:#146c43;font-weight:700}.receipt-status-unpaid{color:#a33b00;font-weight:700}
+.quick-materials{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.quick-materials button{font-size:13px}
+@media(max-width:600px){
+ .feature-form{grid-template-columns:1fr 1fr}
+ .feature-form .wide{grid-column:1/-1}
+ .feature-summary{grid-template-columns:1fr}
+ .feature-stat{padding:9px}
+ .feature-stat strong{font-size:18px}
+ .purchase-form{grid-template-columns:1fr 1fr}
+ .purchase-form button{grid-column:1/-1}
+ .material-card,.receipt-card{padding:10px}
+}
+</style>
+
 </head>
 <body>
 <header class="site-header"><div class="site-header-inner"><div class="brand-mark" aria-hidden="true">●</div><div><div class="site-title">one make たこ焼き</div><div class="site-subtitle">学祭スタッフ用シフト・売上管理</div></div></div></header><div id="syncStatus" style="background:#fff;padding:7px 12px;text-align:center;font-size:12px;color:#666;border-bottom:1px solid #ddd">Firebase接続中…</div>
@@ -481,23 +523,33 @@ th{background:#eef1f4;color:#1a1a1a;font-weight:700;}
     <div class="sales-unit-total" id="sales-unit-total">合計 0個</div>
   </div>
 
-  <div class="expense-section">
-    <div class="section-title-row">
-      <h2>経費</h2>
-      <div class="expense-total">経費合計 <strong id="expense-total">0円</strong></div>
+
+  <section class="feature-section" id="materialsSection">
+    <h2>材料・購入記録</h2>
+    <p class="hint">材料ごとの購入数量・金額・購入履歴を記録します。レシート精算とは別集計です。同じ購入を両方に登録した場合、金額を二重計上しないよう注意してください。</p>
+    <div class="feature-form">
+      <input id="materialName" placeholder="材料名（例：たこ）" maxlength="80">
+      <input id="materialUnit" placeholder="単位（例：kg、袋、個）" maxlength="20">
+      <button class="feature-btn feature-btn-primary wide" onclick="addMaterial()">材料を追加</button>
     </div>
-    <div class="expense-warning">
-      <strong>レシート1枚につき1回だけ登録</strong><br>
-      1枚のレシートに複数の商品がある場合も、商品をまとめて合計金額を1回だけ登録してください。
+    <div class="quick-materials" id="quickMaterials"></div>
+    <div id="materialsSummary" class="feature-summary"></div>
+    <div id="materialsList"></div><p id="materialsStatus" class="hint"></p>
+  </section>
+
+  <section class="feature-section" id="receiptsSection">
+    <h2>レシート・立替精算</h2>
+    <p class="feature-note"><strong>レシート1枚につき1回だけ登録してください。</strong><br>レシートに複数の商品が載っていても、合計金額を1件として登録します。購入者名・金額・画像を記録し、返金状況を管理します。</p>
+    <div class="feature-form">
+      <input id="receiptBuyer" placeholder="購入者名" maxlength="80">
+      <input id="receiptAmount" type="number" min="1" step="1" inputmode="numeric" placeholder="金額（円）">
+      <button id="receiptSubmit" class="feature-btn feature-btn-primary wide" onclick="addReceipt()">レシートを登録</button>
     </div>
-    <div class="expense-form">
-      <input id="expenseItem" placeholder="品名（例：紙皿・割り箸）">
-      <input id="expenseAmount" type="number" min="0" inputmode="numeric" placeholder="金額（円）">
-      <input id="expenseBuyer" placeholder="購入者名">
-      <button class="expense-add" onclick="addExpense()">経費を追加</button>
-    </div>
-    <div id="expenseList" class="expense-list"></div>
-  </div>
+    <div id="receiptsSummary" class="feature-summary"></div>
+    <div id="receiptsByBuyer"></div>
+    <div id="receiptsList"></div><p id="receiptsStatus" class="hint"></p>
+  </section>
+
 </section>
 
 <section id="members" class="page">
@@ -533,6 +585,7 @@ th{background:#eef1f4;color:#1a1a1a;font-weight:700;}
 
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyB5OheiN9AYsGNJ2btxpwsVTgorCSe2foY",
@@ -545,13 +598,15 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+// レシート機能用。匿名認証を使い、Storage/精算データへの未認証アクセスを防ぎます。
+const authReady = firebase.auth().currentUser ? Promise.resolve() : firebase.auth().signInAnonymously();
 </script>
 
 <script>
 const DATES=["10/30","10/31","11/1"];
 const TIMES=[];
 for(let h=10;h<19;h++) TIMES.push(`${h}:00〜${h+1}:00`);
-const POSITIONS=["会計1","会計2","焼き1","焼き2","焼き3","焼き4","焼き5","焼き6","焼き7","焼き8","渡し係","客引き係","生地係1","生地係2"];
+const POSITIONS=["会計1","会計2","焼き1","焼き2","焼き3","焼き4","焼き5","焼き6","焼き7","焼き8","盛り付け1","盛り付け2","渡し係","客引き係","生地係1","生地係2"];
 
 let members=[];
 let availability={};
@@ -560,7 +615,9 @@ let memberGrades={};
 let bulletin="";
 let shortages=[];
 let sales={source:0,cheese:0,oroshi:0};
-let expenses=[];
+let expenses=[]; // 旧データ保持用。新規の経費管理画面では使用しません。
+let materials=[];
+let receipts=[];
 let currentDate=DATES[0];
 let currentMember=null;
 let adminSelectedMember="";
@@ -769,6 +826,219 @@ async function removeExpense(index){
  expenses.splice(index,1);
  renderExpenses();
  await save();
+}
+
+
+// ===== 材料・購入履歴 =====
+const STARTER_MATERIALS=["たこ","小麦粉","おろしポン酢","ソース","キャベツ","卵","チーズ明太","天かす","青ねぎ","かつお節","青のり"];
+let materialsListenerStarted=false;
+let receiptsListenerStarted=false;
+let materialsUnsub=null;
+let receiptsUnsub=null;
+
+function startReceiptDataListeners(){
+  if(materialsListenerStarted && receiptsListenerStarted)return;
+  authReady.then(()=>{
+    if(!materialsListenerStarted){
+      materialsListenerStarted=true;
+      materialsUnsub=db.collection("materials").orderBy("name").onSnapshot(snap=>{
+        materials=snap.docs.map(d=>({id:d.id,...d.data()}));
+        renderMaterials();
+      },err=>{
+        console.error(err);
+        setFeatureMessage("materialsStatus","材料データを読み込めません。Firebaseの設定を確認してください。",true);
+      });
+    }
+    if(!receiptsListenerStarted){
+      receiptsListenerStarted=true;
+      receiptsUnsub=db.collection("receipts").orderBy("createdAt","desc").onSnapshot(snap=>{
+        receipts=snap.docs.map(d=>({id:d.id,...d.data()}));
+        renderReceipts();
+      },err=>{
+        console.error(err);
+        setFeatureMessage("receiptsStatus","レシートデータを読み込めません。Firebaseの設定を確認してください。",true);
+      });
+    }
+  }).catch(err=>{
+    console.error(err);
+    setSyncStatus("匿名認証に失敗しました。Firebase Authenticationの設定を確認してください。",true);
+  });
+}
+
+function setFeatureMessage(id,message,error=false){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.textContent=message;
+  el.style.color=error?"#b42318":"#555";
+}
+function yen(value){return (Number(value)||0).toLocaleString("ja-JP")+"円";}
+function safeText(value){return escapeHtml(String(value??""));}
+
+function renderQuickMaterials(){
+  const box=document.getElementById("quickMaterials");
+  if(!box)return;
+  box.innerHTML="<span class='feature-subtext'>候補：</span>";
+  STARTER_MATERIALS.filter(n=>!materials.some(m=>m.name===n)).forEach(name=>{
+    const b=document.createElement("button");
+    b.className="feature-btn";
+    b.textContent="+ "+name;
+    b.onclick=()=>{document.getElementById("materialName").value=name;document.getElementById("materialUnit").focus();};
+    box.appendChild(b);
+  });
+}
+async function addMaterial(){
+  const name=document.getElementById("materialName").value.trim();
+  const unit=document.getElementById("materialUnit").value.trim();
+  if(!name){alert("材料名を入力してください。");return;}
+  if(materials.some(m=>String(m.name).toLowerCase()===name.toLowerCase())){alert("同じ名前の材料がすでに登録されています。");return;}
+  try{
+    await authReady;
+    await db.collection("materials").add({name,unit:unit||"個",purchases:[],createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    document.getElementById("materialName").value="";
+    document.getElementById("materialUnit").value="";
+  }catch(e){console.error(e);alert("材料を追加できませんでした。Firebaseの設定を確認してください。\n"+e.message);}
+}
+async function renameMaterial(id,oldName,oldUnit){
+  const name=prompt("材料名を変更",oldName);
+  if(name===null)return;
+  const clean=name.trim();
+  if(!clean){alert("材料名を空欄にはできません。");return;}
+  if(materials.some(m=>m.id!==id && String(m.name).toLowerCase()===clean.toLowerCase())){alert("同じ名前の材料がすでにあります。");return;}
+  const unit=prompt("単位を変更（例：kg、袋、個）",oldUnit||"個");
+  if(unit===null)return;
+  try{await db.collection("materials").doc(id).update({name:clean,unit:unit.trim()||"個"});}
+  catch(e){alert("変更に失敗しました。\n"+e.message);}
+}
+async function addMaterialPurchase(id){
+  const mat=materials.find(m=>m.id===id);if(!mat)return;
+  const card=document.querySelector(`[data-material-id="${CSS.escape(id)}"]`);
+  const qty=Number(card?.querySelector(".purchase-qty")?.value);
+  const amount=Math.floor(Number(card?.querySelector(".purchase-amount")?.value));
+  const date=card?.querySelector(".purchase-date")?.value||new Date().toISOString().slice(0,10);
+  if(!Number.isFinite(qty)||qty<=0||!Number.isFinite(amount)||amount<0){alert("購入数量は0より大きく、金額は0円以上で入力してください。");return;}
+  const purchase={id:crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2),qty,amount,date,createdAt:new Date().toISOString()};
+  try{
+    await authReady;
+    await db.runTransaction(async tx=>{
+      const ref=db.collection("materials").doc(id);
+      const snap=await tx.get(ref);
+      if(!snap.exists)throw new Error("材料が見つかりません。");
+      const list=Array.isArray(snap.data().purchases)?snap.data().purchases:[];
+      tx.update(ref,{purchases:[...list,purchase]});
+    });
+  }catch(e){console.error(e);alert("購入記録を保存できませんでした。\n"+e.message);}
+}
+async function deleteMaterialPurchase(materialId,purchaseId){
+  if(!confirm("この購入履歴を削除しますか？"))return;
+  try{
+    await db.runTransaction(async tx=>{
+      const ref=db.collection("materials").doc(materialId);
+      const snap=await tx.get(ref);if(!snap.exists)return;
+      const list=Array.isArray(snap.data().purchases)?snap.data().purchases:[];
+      tx.update(ref,{purchases:list.filter(p=>p.id!==purchaseId)});
+    });
+  }catch(e){alert("購入履歴を削除できませんでした。\n"+e.message);}
+}
+async function deleteMaterial(id,name){
+  if(!confirm(`「${name}」と購入履歴をすべて削除しますか？\nこの操作は取り消せません。`))return;
+  try{await db.collection("materials").doc(id).delete();}
+  catch(e){alert("材料を削除できませんでした。\n"+e.message);}
+}
+function renderMaterials(){
+  const list=document.getElementById("materialsList");
+  const summary=document.getElementById("materialsSummary");
+  if(!list||!summary)return;
+  renderQuickMaterials();
+  let totalSpend=0,totalQty=0,purchaseCount=0;
+  materials.forEach(m=>(Array.isArray(m.purchases)?m.purchases:[]).forEach(p=>{totalSpend+=Number(p.amount)||0;totalQty+=Number(p.qty)||0;purchaseCount++;}));
+  summary.innerHTML=`<div class="feature-stat"><small>登録材料</small><strong>${materials.length}種類</strong></div><div class="feature-stat"><small>購入履歴</small><strong>${purchaseCount}件</strong></div><div class="feature-stat"><small>材料購入額合計</small><strong>${yen(totalSpend)}</strong></div>`;
+  list.innerHTML="";
+  if(!materials.length){list.innerHTML="<p class='hint'>材料がまだありません。上の候補ボタンから選ぶか、材料名を入力して追加してください。</p>";return;}
+  materials.forEach(m=>{
+    const purchases=Array.isArray(m.purchases)?m.purchases:[];
+    const qty=purchases.reduce((a,p)=>a+(Number(p.qty)||0),0);
+    const amount=purchases.reduce((a,p)=>a+(Number(p.amount)||0),0);
+    const card=document.createElement("div");card.className="material-card";card.dataset.materialId=m.id;
+    card.innerHTML=`<div class="material-card-head"><div><h3>${safeText(m.name)}</h3><div class="feature-subtext">購入合計：${qty.toLocaleString("ja-JP")} ${safeText(m.unit||"個")} ／ ${yen(amount)}</div></div><div class="feature-actions"><button class="feature-btn" data-action="edit">編集</button><button class="feature-btn feature-btn-danger" data-action="delete">削除</button></div></div>
+    <div class="purchase-form"><input class="purchase-qty" type="number" min="0.001" step="any" placeholder="数量（${safeText(m.unit||"個")}）"><input class="purchase-amount" type="number" min="0" step="1" placeholder="金額（円）"><input class="purchase-date" type="date" value="${new Date().toISOString().slice(0,10)}"><button class="feature-btn feature-btn-primary" data-action="purchase">購入を記録</button></div>
+    <div class="purchase-history"></div>`;
+    card.querySelector('[data-action="edit"]').onclick=()=>renameMaterial(m.id,m.name,m.unit||"個");
+    card.querySelector('[data-action="delete"]').onclick=()=>deleteMaterial(m.id,m.name);
+    card.querySelector('[data-action="purchase"]').onclick=()=>addMaterialPurchase(m.id);
+    const history=card.querySelector(".purchase-history");
+    if(!purchases.length)history.innerHTML="<div class='feature-subtext'>購入履歴はまだありません。</div>";
+    else purchases.slice().sort((a,b)=>String(b.date||"").localeCompare(String(a.date||""))).forEach(p=>{
+      const row=document.createElement("div");row.className="feature-row";
+      const unitPrice=Number(p.qty)>0?Math.round((Number(p.amount)||0)/Number(p.qty)):0;
+      row.innerHTML=`<div><strong>${safeText(p.date||"日付なし")}</strong><div>${Number(p.qty).toLocaleString("ja-JP")} ${safeText(m.unit||"個")} ・ ${yen(p.amount)} <span class="feature-subtext">（単位あたり約${yen(unitPrice)}）</span></div></div><button class="feature-btn feature-btn-danger">削除</button>`;
+      row.querySelector("button").onclick=()=>deleteMaterialPurchase(m.id,p.id);
+      history.appendChild(row);
+    });
+    list.appendChild(card);
+  });
+}
+
+// ===== レシート情報（画像なし）・立替精算 =====
+async function addReceipt(){
+  const buyer=document.getElementById("receiptBuyer").value.trim();
+  const amount=Math.floor(Number(document.getElementById("receiptAmount").value));
+  if(!buyer){alert("購入者名を入力してください。");return;}
+  if(!Number.isFinite(amount)||amount<1){alert("金額を1円以上で入力してください。");return;}
+  if(!confirm(`購入者：${buyer}\n金額：${yen(amount)}\n\nこの立替記録を1件登録しますか？\n同じレシートの金額を重複登録しないでください。`))return;
+  const button=document.getElementById("receiptSubmit");button.disabled=true;button.textContent="登録中…";
+  try{
+    await authReady;
+    await db.collection("receipts").add({
+      buyer,amount,reimbursementStatus:"unpaid",
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById("receiptBuyer").value="";
+    document.getElementById("receiptAmount").value="";
+    alert("立替記録を登録しました。レシート原本は別途保管してください。");
+  }catch(e){
+    console.error(e);
+    alert("立替記録を登録できませんでした。FirebaseのAuthentication・Firestoreルールを確認してください。\n"+e.message);
+  }finally{button.disabled=false;button.textContent="立替記録を登録";}
+}
+async function toggleReceiptPaid(id,paid){
+  try{await db.collection("receipts").doc(id).update({reimbursementStatus:paid?"paid":"unpaid",reimbursedAt:paid?firebase.firestore.FieldValue.serverTimestamp():null});}
+  catch(e){alert("返金状況を更新できませんでした。\n"+e.message);}
+}
+async function deleteReceipt(id){
+  const r=receipts.find(x=>x.id===id);if(!r)return;
+  if(!confirm(`購入者：${r.buyer}\n金額：${yen(r.amount)}\n\nこの立替記録を削除しますか？\nこの操作は取り消せません。`))return;
+  try{await authReady;await db.collection("receipts").doc(id).delete();}
+  catch(e){console.error(e);alert("削除に失敗しました。\n"+e.message);}
+}
+function renderReceipts(){
+  const summary=document.getElementById("receiptsSummary"),byBuyer=document.getElementById("receiptsByBuyer"),list=document.getElementById("receiptsList");
+  if(!summary||!byBuyer||!list)return;
+  const total=receipts.reduce((a,r)=>a+(Number(r.amount)||0),0);
+  const unpaid=receipts.filter(r=>r.reimbursementStatus!=="paid").reduce((a,r)=>a+(Number(r.amount)||0),0);
+  const paid=total-unpaid;
+  summary.innerHTML=`<div class="feature-stat"><small>立替合計</small><strong>${yen(total)}</strong></div><div class="feature-stat"><small>未返金</small><strong>${yen(unpaid)}</strong></div><div class="feature-stat"><small>返金済み</small><strong>${yen(paid)}</strong></div>`;
+  const people={};
+  receipts.forEach(r=>{const b=r.buyer||"名前未設定";if(!people[b])people[b]={total:0,unpaid:0,count:0};people[b].total+=Number(r.amount)||0;people[b].count++;if(r.reimbursementStatus!=="paid")people[b].unpaid+=Number(r.amount)||0;});
+  byBuyer.innerHTML="<h3>購入者ごとの精算額</h3>";
+  if(!Object.keys(people).length)byBuyer.innerHTML+="<p class='hint'>まだレシートは登録されていません。</p>";
+  Object.entries(people).sort((a,b)=>b[1].unpaid-a[1].unpaid).forEach(([buyer,x])=>{
+    const row=document.createElement("div");row.className="receipt-person-summary";
+    row.innerHTML=`<strong>${safeText(buyer)}</strong><div>立替合計：${yen(x.total)}（${x.count}枚）</div><div>未返金：<strong>${yen(x.unpaid)}</strong></div>`;
+    byBuyer.appendChild(row);
+  });
+  list.innerHTML="<h3>レシート一覧</h3>";
+  if(!receipts.length){list.innerHTML+="<p class='hint'>レシートはまだ登録されていません。</p>";return;}
+  receipts.forEach(r=>{
+    const paid=r.reimbursementStatus==="paid";
+    const card=document.createElement("div");card.className="receipt-card";
+    const date=r.createdAt?.toDate?r.createdAt.toDate().toLocaleString("ja-JP"):"登録日時を取得中";
+    card.innerHTML=`<div class="receipt-card-head"><div><h3>${safeText(r.buyer)}</h3><div><strong>${yen(r.amount)}</strong></div><div class="feature-subtext">${date}</div><div class="${paid?"receipt-status-paid":"receipt-status-unpaid"}">${paid?"返金済み":"未返金"}</div></div></div>
+      <div class="feature-subtext">レシート原本は別途保管してください。</div>
+      <div class="feature-actions"><button class="feature-btn" data-action="paid">${paid?"未返金に戻す":"返金済みにする"}</button><button class="feature-btn feature-btn-danger" data-action="delete">削除</button></div>`;
+    card.querySelector('[data-action="paid"]').onclick=()=>toggleReceiptPaid(r.id,!paid);
+    card.querySelector('[data-action="delete"]').onclick=()=>deleteReceipt(r.id);
+    list.appendChild(card);
+  });
 }
 
 function renderSchedule(){
@@ -1111,10 +1381,10 @@ function renderAdminTable(){
 
 renderBulletin();
 renderSales();
-renderExpenses();
 renderSchedule();
 renderMembers();
 loadCloudData();
+startReceiptDataListeners();
 </script>
 
 <section id="admin" class="page">
