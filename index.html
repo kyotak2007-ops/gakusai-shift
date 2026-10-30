@@ -1724,7 +1724,6 @@ async function submitKitchenOrder(){
   finally{if(btn){btn.textContent="注文する";renderReception();}}
 }
 async function completeKitchenOrder(number){
-  if(!confirm("番号 "+number+" の注文を提供完了にしますか？"))return;
   try{
     await authReady;
     const ref=db.collection("orders").doc(ticketDocId(number));
