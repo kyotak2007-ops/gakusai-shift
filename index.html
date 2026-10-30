@@ -506,6 +506,29 @@ th{background:#eef1f4;color:#1a1a1a;font-weight:700;}
 }
 </style>
 
+
+<style>
+/* 注文管理：タブレット向け大きなタップ領域 */
+.order-page{max-width:1250px!important;padding:22px!important}
+.order-page-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}
+.order-page-heading h2{margin:0 0 5px}
+.order-connection{font-size:14px;color:#52606d;background:#f1f5f7;border-radius:10px;padding:10px 14px;white-space:nowrap}
+.next-ticket-panel{background:#f3f7fa;border:2px solid #d8e3ea;border-radius:18px;padding:18px;text-align:center;margin:0 auto 18px;max-width:650px}
+.next-ticket-label{font-size:20px;font-weight:700;color:#53616b}.next-ticket-number{font-size:clamp(64px,10vw,100px);line-height:1.05;font-weight:800;color:#173f5f;font-variant-numeric:tabular-nums}.next-ticket-note{font-size:15px;color:#65727d;margin-top:5px}
+.order-entry-list{max-width:850px;margin:0 auto;background:#fff;border:1px solid #d9e0e5;border-radius:18px;overflow:hidden}
+.order-entry-row{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 24px;border-bottom:1px solid #e5eaee;min-height:100px;box-sizing:border-box}
+.order-entry-row:last-child{border-bottom:0}.order-product-name{font-size:clamp(24px,3vw,34px);font-weight:800;color:#273744}
+.order-stepper{display:flex;align-items:center;gap:14px}.order-stepper output{font-size:34px;font-weight:800;min-width:52px;text-align:center;font-variant-numeric:tabular-nums}
+.order-step{width:64px;height:64px;border:1px solid #b9c6cf;border-radius:14px;background:#f5f7f8;color:#273744;font-size:36px;font-weight:700;touch-action:manipulation}.order-step.plus{background:#e5f2eb;border-color:#91bea5;color:#17633d}
+.order-entry-footer{max-width:850px;margin:16px auto 0;display:flex;align-items:center;justify-content:space-between;gap:16px}.order-total-label{font-size:20px;color:#4d5b65}.order-total-label strong{font-size:27px;color:#202b33;margin-left:8px}
+.submit-order-button{min-width:260px;min-height:76px;border:0;border-radius:16px;background:#176b45;color:#fff;font-size:28px;font-weight:800;box-shadow:0 3px 0 #0c4d30;touch-action:manipulation}.submit-order-button:disabled{background:#aeb8b2;box-shadow:none;color:#edf0ee}
+.used-ticket-strip{max-width:850px;margin:18px auto 0;padding:12px 16px;background:#f7f8f9;border-radius:10px;font-size:14px;color:#53616b}.order-status{max-width:850px;margin:12px auto 0;min-height:24px;font-size:15px;font-weight:700;color:#176b45}
+.kitchen-wait-count{background:#fff3dc;border:1px solid #f0d39b;border-radius:14px;padding:10px 20px;text-align:center;min-width:86px}.kitchen-wait-count span{display:block;font-size:36px;font-weight:800;line-height:1.1;color:#8b5200}.kitchen-wait-count small{font-size:13px;color:#79551b}
+.kitchen-orders{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.kitchen-order-card{background:#fff;border:2px solid #dce3e8;border-radius:18px;padding:18px;box-shadow:0 2px 8px rgba(20,40,55,.06);display:flex;flex-direction:column;gap:12px;min-width:0}.kitchen-order-top{display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid #e5eaee;padding-bottom:10px}.kitchen-order-number{font-size:clamp(32px,4vw,48px);font-weight:900;color:#173f5f;line-height:1.1;font-variant-numeric:tabular-nums}.kitchen-order-time{font-size:13px;color:#687680;white-space:nowrap}.kitchen-order-items{display:grid;grid-template-columns:1fr auto;gap:9px 12px;align-items:center}.kitchen-order-items span{font-size:20px;color:#43515b}.kitchen-order-items strong{font-size:26px;font-weight:800;color:#202b33;font-variant-numeric:tabular-nums}.kitchen-order-total{border-top:1px solid #e5eaee;padding-top:8px;text-align:right;color:#687680;font-size:14px}.kitchen-complete-button{width:100%;min-height:58px;border:0;border-radius:12px;background:#176b45;color:#fff;font-size:20px;font-weight:800;touch-action:manipulation}.kitchen-empty{grid-column:1/-1;text-align:center;padding:70px 20px;background:#f7f9fa;border:2px dashed #cbd5dc;border-radius:18px;color:#66747e;font-size:22px;font-weight:700}.kitchen-footer-note{margin-top:18px;color:#66747e;font-size:14px;text-align:center}
+@media(max-width:850px){.kitchen-orders{grid-template-columns:repeat(2,minmax(0,1fr))}.order-page{padding:14px!important}}
+@media(max-width:600px){.order-page-heading{align-items:flex-start}.order-entry-row{padding:13px 12px;min-height:82px}.order-step{width:52px;height:52px;font-size:30px}.order-stepper{gap:8px}.order-stepper output{font-size:28px;min-width:36px}.order-entry-footer{align-items:stretch;flex-direction:column}.submit-order-button{width:100%;min-width:0}.kitchen-orders{grid-template-columns:1fr}.kitchen-order-card{padding:14px}}
+</style>
+
 </head>
 <body>
 <header class="site-header"><div class="site-header-inner"><div class="brand-mark" aria-hidden="true">●</div><div><div class="site-title">one make たこ焼き</div><div class="site-subtitle">学祭スタッフ用シフト・売上管理</div></div></div></header><div id="syncStatus" style="background:#fff;padding:7px 12px;text-align:center;font-size:12px;color:#666;border-bottom:1px solid #ddd">Firebase接続中…</div>
@@ -514,6 +537,8 @@ th{background:#eef1f4;color:#1a1a1a;font-weight:700;}
   <button id="navSchedule" class="active" onclick="showPage('schedule')">シフト表</button>
   <button id="navSales" onclick="showPage('sales')">売上</button>
   <button id="navMembers" onclick="showPage('members')">メンバー</button>
+  <button id="navReception" onclick="showPage('reception')">受付</button>
+  <button id="navKitchen" onclick="showPage('kitchen')">厨房</button>
   <button id="navAdmin" onclick="showPage('admin')">管理者</button>
 </nav>
 
@@ -612,6 +637,25 @@ th{background:#eef1f4;color:#1a1a1a;font-weight:700;}
     <div id="receiptsList"></div><p id="receiptsStatus" class="hint"></p>
   </section>
 
+</section>
+
+<section id="reception" class="page order-page">
+  <div class="order-page-heading"><div><h2>受付・注文入力</h2><p class="hint">商品数を入力して「注文する」を押してください。</p></div><div class="order-connection" id="orderConnection">厨房と同期中…</div></div>
+  <div class="next-ticket-panel"><div class="next-ticket-label">次の番号札</div><div class="next-ticket-number" id="nextTicketNumber">1</div><div class="next-ticket-note" id="nextTicketNote">1〜14を順番に使用します</div></div>
+  <div class="order-entry-list">
+    <div class="order-entry-row"><div class="order-product-name">ソース</div><div class="order-stepper"><button type="button" class="order-step" onclick="changeOrderQty('source',-1)" aria-label="ソースを1個減らす">−</button><output id="qty-source">0</output><button type="button" class="order-step plus" onclick="changeOrderQty('source',1)" aria-label="ソースを1個増やす">＋</button></div></div>
+    <div class="order-entry-row"><div class="order-product-name">明太</div><div class="order-stepper"><button type="button" class="order-step" onclick="changeOrderQty('mentai',-1)" aria-label="明太を1個減らす">−</button><output id="qty-mentai">0</output><button type="button" class="order-step plus" onclick="changeOrderQty('mentai',1)" aria-label="明太を1個増やす">＋</button></div></div>
+    <div class="order-entry-row"><div class="order-product-name">おろし</div><div class="order-stepper"><button type="button" class="order-step" onclick="changeOrderQty('oroshi',-1)" aria-label="おろしを1個減らす">−</button><output id="qty-oroshi">0</output><button type="button" class="order-step plus" onclick="changeOrderQty('oroshi',1)" aria-label="おろしを1個増やす">＋</button></div></div>
+  </div>
+  <div class="order-entry-footer"><div class="order-total-label">注文合計 <strong id="orderTotalQty">0個</strong></div><button type="button" id="submitOrderButton" class="submit-order-button" onclick="submitKitchenOrder()" disabled>注文する</button></div>
+  <div class="used-ticket-strip"><strong>使用中の番号：</strong><span id="usedTicketNumbers">まだありません</span></div>
+  <div id="receptionStatus" class="order-status" role="status"></div>
+</section>
+
+<section id="kitchen" class="page order-page">
+  <div class="order-page-heading"><div><h2>厨房・注文一覧</h2><p class="hint">受付から届いた注文を番号札ごとに表示します。</p></div><div class="kitchen-wait-count"><span id="kitchenWaitCount">0</span><small>件待ち</small></div></div>
+  <div id="kitchenOrders" class="kitchen-orders"><div class="kitchen-empty">現在、待っている注文はありません。</div></div>
+  <div class="kitchen-footer-note">商品をお客さんに渡したら「提供完了」を押してください。番号は1〜14を一巡してから再利用されます。</div>
 </section>
 
 <section id="members" class="page">
@@ -760,11 +804,14 @@ function showPage(page){
  document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
  document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
  document.getElementById(page).classList.add("active");
- const navId=page==="schedule"?"navSchedule":page==="members"?"navMembers":page==="sales"?"navSales":"navAdmin";
+ const navMap={schedule:"navSchedule",members:"navMembers",sales:"navSales",reception:"navReception",kitchen:"navKitchen",admin:"navAdmin"};
+ const navId=navMap[page]||"navAdmin";
  document.getElementById(navId).classList.add("active");
  if(page==="schedule")renderSchedule();
  if(page==="sales")renderSales();
  if(page==="members")renderMembers();
+ if(page==="reception")renderReception();
+ if(page==="kitchen")renderKitchenOrders();
  if(page==="admin"){checkAdminLogin(); if(sessionStorage.getItem("one_make_admin")==="1"){setupAdmin();renderAdmin();}}
 }
 
@@ -1599,6 +1646,106 @@ function exportShiftPng(){
   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
  },"image/png");
 }
+
+// ===== 注文管理（既存 app/state とは独立した orders コレクション） =====
+const ORDER_TICKETS=Array.from({length:14},(_,i)=>i+1);
+const orderQty={source:0,mentai:0,oroshi:0};
+let liveOrders=[];
+let orderNextNumber=1;
+let orderListenersStarted=false;
+let orderListenerUnsubs=[];
+const ticketDocId=n=>"ticket_"+String(n).padStart(2,"0");
+function changeOrderQty(key,delta){
+  orderQty[key]=Math.max(0,Math.min(99,(Number(orderQty[key])||0)+delta));
+  renderReception();
+}
+function getNextTicketPreview(){
+  const occupied=new Set(liveOrders.map(o=>Number(o.number)));
+  for(let i=0;i<14;i++){
+    const n=((orderNextNumber-1+i)%14)+1;
+    if(!occupied.has(n))return n;
+  }
+  return null;
+}
+function renderReception(){
+  ["source","mentai","oroshi"].forEach(k=>{const el=document.getElementById("qty-"+k);if(el)el.textContent=orderQty[k]||0;});
+  const total=orderQty.source+orderQty.mentai+orderQty.oroshi;
+  const totalEl=document.getElementById("orderTotalQty");if(totalEl)totalEl.textContent=total+"個";
+  const next=getNextTicketPreview();
+  const numberEl=document.getElementById("nextTicketNumber");if(numberEl)numberEl.textContent=next===null?"満席":String(next).padStart(2,"0");
+  const note=document.getElementById("nextTicketNote");if(note)note.textContent=next===null?"14枚すべて使用中です。提供完了をお待ちください。":"1〜14を順番に使用します";
+  const btn=document.getElementById("submitOrderButton");if(btn)btn.disabled=total===0||next===null;
+  const used=document.getElementById("usedTicketNumbers");if(used){const nums=liveOrders.map(o=>Number(o.number)).sort((a,b)=>a-b);used.textContent=nums.length?nums.map(n=>String(n).padStart(2,"0")).join("・"):"まだありません";}
+}
+function renderKitchenOrders(){
+  const root=document.getElementById("kitchenOrders");if(!root)return;
+  const count=document.getElementById("kitchenWaitCount");if(count)count.textContent=liveOrders.length;
+  root.innerHTML="";
+  if(!liveOrders.length){root.innerHTML='<div class="kitchen-empty">現在、待っている注文はありません。</div>';return;}
+  const sorted=[...liveOrders].sort((a,b)=>Number(a.number)-Number(b.number));
+  sorted.forEach(order=>{
+    const card=document.createElement("article");card.className="kitchen-order-card";
+    const top=document.createElement("div");top.className="kitchen-order-top";
+    const num=document.createElement("div");num.className="kitchen-order-number";num.textContent="番号 "+String(order.number).padStart(2,"0");top.appendChild(num);
+    const time=document.createElement("div");time.className="kitchen-order-time";
+    let timeText="";if(order.createdAt&&order.createdAt.toDate){timeText=order.createdAt.toDate().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"})+" 受付";}time.textContent=timeText;top.appendChild(time);card.appendChild(top);
+    const items=document.createElement("div");items.className="kitchen-order-items";
+    [["ソース",order.source],["明太",order.mentai],["おろし",order.oroshi]].forEach(([name,value])=>{if(Number(value)>0){const label=document.createElement("span");label.textContent=name;const qty=document.createElement("strong");qty.textContent=Number(value)+"個";items.append(label,qty);}});
+    card.appendChild(items);
+    const total=document.createElement("div");total.className="kitchen-order-total";total.textContent="合計 "+(Number(order.source||0)+Number(order.mentai||0)+Number(order.oroshi||0))+"個";card.appendChild(total);
+    const done=document.createElement("button");done.type="button";done.className="kitchen-complete-button";done.textContent="提供完了";done.onclick=()=>completeKitchenOrder(order.number);card.appendChild(done);
+    root.appendChild(card);
+  });
+}
+async function submitKitchenOrder(){
+  const total=orderQty.source+orderQty.mentai+orderQty.oroshi;
+  if(!total){alert("商品数を1個以上入力してください。");return;}
+  const btn=document.getElementById("submitOrderButton");if(btn){btn.disabled=true;btn.textContent="送信中…";}
+  try{
+    await authReady;
+    const controlRef=db.collection("orderSystem").doc("control");
+    const refs=ORDER_TICKETS.map(n=>db.collection("orders").doc(ticketDocId(n)));
+    const quantities={source:orderQty.source,mentai:orderQty.mentai,oroshi:orderQty.oroshi};
+    const assigned=await db.runTransaction(async tx=>{
+      const controlSnap=await tx.get(controlRef);
+      const snaps=[];for(const ref of refs)snaps.push(await tx.get(ref));
+      const occupied=new Set();snaps.forEach((snap,i)=>{if(snap.exists)occupied.add(i+1);});
+      let pointer=Number(controlSnap.exists?controlSnap.data().nextNumber:1);if(!Number.isInteger(pointer)||pointer<1||pointer>14)pointer=1;
+      let chosen=null;
+      for(let i=0;i<14;i++){const n=((pointer-1+i)%14)+1;if(!occupied.has(n)){chosen=n;break;}}
+      if(chosen===null)throw new Error("TICKETS_FULL");
+      tx.set(refs[chosen-1],{number:chosen,source:quantities.source,mentai:quantities.mentai,oroshi:quantities.oroshi,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+      tx.set(controlRef,{nextNumber:chosen===14?1:chosen+1,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+      return chosen;
+    });
+    orderQty.source=0;orderQty.mentai=0;orderQty.oroshi=0;renderReception();
+    const status=document.getElementById("receptionStatus");if(status)status.textContent="番号 "+String(assigned).padStart(2,"0")+" の注文を厨房に送りました。";
+  }catch(e){console.error(e);const status=document.getElementById("receptionStatus");if(status)status.textContent=e.message==="TICKETS_FULL"?"番号札1〜14がすべて使用中です。提供完了をお待ちください。":"注文を送信できませんでした。通信・Firestoreルールを確認してください。";}
+  finally{if(btn){btn.textContent="注文する";renderReception();}}
+}
+async function completeKitchenOrder(number){
+  if(!confirm("番号 "+number+" の注文を提供完了にしますか？"))return;
+  try{
+    await authReady;
+    const ref=db.collection("orders").doc(ticketDocId(number));
+    await db.runTransaction(async tx=>{const snap=await tx.get(ref);if(snap.exists)tx.delete(ref);});
+  }catch(e){console.error(e);alert("提供完了の処理に失敗しました。\n"+e.message);}
+}
+function startOrderListeners(){
+  if(orderListenersStarted)return;orderListenersStarted=true;
+  authReady.then(()=>{
+    const ordersUnsub=db.collection("orders").onSnapshot(snap=>{
+      liveOrders=snap.docs.map(d=>({...d.data(),id:d.id}));
+      renderReception();renderKitchenOrders();
+      const status=document.getElementById("orderConnection");if(status)status.textContent="厨房とリアルタイム同期中";
+    },e=>{console.error(e);const status=document.getElementById("orderConnection");if(status)status.textContent="注文データの接続エラー";});
+    const controlUnsub=db.collection("orderSystem").doc("control").onSnapshot(snap=>{
+      orderNextNumber=Number(snap.exists?snap.data().nextNumber:1);if(!Number.isInteger(orderNextNumber)||orderNextNumber<1||orderNextNumber>14)orderNextNumber=1;renderReception();
+    },e=>console.error(e));
+    orderListenerUnsubs=[ordersUnsub,controlUnsub];
+  }).catch(e=>{console.error(e);const status=document.getElementById("orderConnection");if(status)status.textContent="認証エラー";});
+}
+startOrderListeners();
 
 renderBulletin();
 renderSales();
