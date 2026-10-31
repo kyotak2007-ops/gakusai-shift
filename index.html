@@ -87,6 +87,14 @@ th{background:#eee;position:sticky;top:0;z-index:2}
 .schedule-export-buttons{display:flex;gap:8px;flex-wrap:wrap}
 .schedule-export-buttons button{width:auto;margin:0;padding:9px 12px}
 @media(max-width:480px){.schedule-export-heading{align-items:flex-start}.schedule-export-buttons{width:100%}.schedule-export-buttons button{flex:1}}
+
+.sales-reset-area{max-width:760px;margin:14px auto 24px;text-align:center}
+.sales-reset-button{min-height:48px;padding:10px 24px;border:1px solid #b42318;border-radius:10px;background:#fff;color:#b42318;font-size:17px;font-weight:800;cursor:pointer}
+.sales-reset-button:active{background:#fff1f0}
+.kitchen-heading-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+.kitchen-undo-button{min-height:48px;padding:10px 18px;border:1px solid #526777;border-radius:10px;background:#fff;color:#263b4a;font-size:16px;font-weight:800;cursor:pointer}
+.kitchen-undo-button:disabled{opacity:.4;cursor:not-allowed}
+@media(max-width:700px){.kitchen-heading-actions{width:100%;justify-content:space-between}.kitchen-undo-button{flex:1}}
 </style>
 <style>
 .member-grade{font-size:11px;padding:3px 6px;border-radius:10px;margin-left:5px}
@@ -580,9 +588,9 @@ th{background:#eef1f4;color:#1a1a1a;font-weight:700;}
       <button class="sales-minus" onclick="changeSale('source',-1)" aria-label="ソースを1個減らす">−</button>
     </div>
     <div class="sales-card">
-      <button class="sales-main sales-cheese" onclick="changeSale('cheese',1)">チーズ</button>
+      <button class="sales-main sales-cheese" onclick="changeSale('cheese',1)">明太</button>
       <div class="sales-count"><span id="sales-cheese">0</span>個</div>
-      <button class="sales-minus" onclick="changeSale('cheese',-1)" aria-label="チーズを1個減らす">−</button>
+      <button class="sales-minus" onclick="changeSale('cheese',-1)" aria-label="明太を1個減らす">−</button>
     </div>
     <div class="sales-card">
       <button class="sales-main sales-oroshi" onclick="changeSale('oroshi',1)">おろし</button>
@@ -594,6 +602,10 @@ th{background:#eef1f4;color:#1a1a1a;font-weight:700;}
     <div class="sales-total-label">現在の総売り上げ</div>
     <div class="sales-total-value" id="sales-total">0円</div>
     <div class="sales-unit-total" id="sales-unit-total">合計 0個</div>
+  </div>
+  <div class="sales-reset-area">
+    <button type="button" class="sales-reset-button" onclick="resetSales()">売り上げ数をリセット</button>
+    <p class="hint">ソース・明太（チーズ）・おろしの累計をすべて0にします。</p>
   </div>
 
 
@@ -667,9 +679,9 @@ th{background:#eef1f4;color:#1a1a1a;font-weight:700;}
 </section>
 
 <section id="kitchen" class="page order-page">
-  <div class="order-page-heading"><div><h2>厨房・注文一覧</h2><p class="hint">受付から届いた注文を番号札ごとに表示します。</p></div><div class="kitchen-wait-count"><span id="kitchenWaitCount">0</span><small>件待ち</small></div></div>
+  <div class="order-page-heading"><div><h2>厨房・注文一覧</h2><p class="hint">受付から届いた注文を番号札ごとに表示します。</p></div><div class="kitchen-heading-actions"><div class="kitchen-wait-count"><span id="kitchenWaitCount">0</span><small>件待ち</small></div><button type="button" id="undoKitchenButton" class="kitchen-undo-button" onclick="undoKitchenCompletion()" disabled>↶ ひとつ戻す</button></div></div>
   <div id="kitchenOrders" class="kitchen-orders"><div class="kitchen-empty">現在、待っている注文はありません。</div></div>
-  <div class="kitchen-footer-note">商品をお客さんに渡したら「提供完了」を押してください。番号は1〜16を一巡してから再利用されます。</div>
+  <div class="kitchen-footer-note">商品をお客さんに渡したら「提供完了」を押してください。誤って完了した場合は「ひとつ戻す」で直前の1件を復元できます。</div>
 </section>
 
 <section id="members" class="page">
@@ -908,6 +920,22 @@ async function changeSale(key,delta){
  }catch(e){
    console.error(e);
    setSyncStatus("売上の更新に失敗しました",true);
+ }
+}
+
+async function resetSales(){
+ if(!confirm("売り上げ数をすべて0にリセットしますか？\\nこの操作は元に戻せません。"))return;
+ const ref=db.collection("app").doc("state");
+ try{
+   await authReady;
+   await db.runTransaction(async tx=>{
+     const snap=await tx.get(ref);
+     tx.set(ref,{sales:{source:0,cheese:0,oroshi:0},updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+   });
+   setSyncStatus("売り上げ数をリセットしました");
+ }catch(e){
+   console.error(e);
+   alert("売り上げ数をリセットできませんでした。\\n"+e.message);
  }
 }
 
@@ -1761,10 +1789,19 @@ async function submitKitchenOrder(){
       if(snap.exists)throw new Error("TICKET_OCCUPIED");
       const controlSnap=await tx.get(controlRef);
       const controlData=controlSnap.exists?controlSnap.data():{};
+      const salesRef=db.collection("app").doc("state");
+      const salesSnap=await tx.get(salesRef);
+      const salesData=salesSnap.exists?salesSnap.data():{};
+      const currentSales={source:Number(salesData.sales?.source)||0,cheese:Number(salesData.sales?.cheese)||0,oroshi:Number(salesData.sales?.oroshi)||0};
+      // 明太は既存の売上欄「チーズ」に加算
+      currentSales.source+=quantities.source;
+      currentSales.cheese+=quantities.mentai;
+      currentSales.oroshi+=quantities.oroshi;
       const pointer=chosenNumber===16?1:chosenNumber+1;
       const orderIndex=Number.isFinite(Number(controlData.nextOrderIndex))?Number(controlData.nextOrderIndex):1;
       tx.set(ref,{number:chosenNumber,source:quantities.source,mentai:quantities.mentai,oroshi:quantities.oroshi,...(note?{note}:{}),orderIndex,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
       tx.set(controlRef,{nextNumber:pointer,nextOrderIndex:orderIndex+1,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+      tx.set(salesRef,{sales:currentSales,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
       return chosenNumber;
     });
     orderQty.source=0;orderQty.mentai=0;orderQty.oroshi=0;
@@ -1782,8 +1819,40 @@ async function completeKitchenOrder(number){
   try{
     await authReady;
     const ref=db.collection("orders").doc(ticketDocId(number));
-    await db.runTransaction(async tx=>{const snap=await tx.get(ref);if(snap.exists)tx.delete(ref);});
-  }catch(e){console.error(e);alert("提供完了の処理に失敗しました。\n"+e.message);}
+    const controlRef=db.collection("orderSystem").doc("control");
+    await db.runTransaction(async tx=>{
+      const snap=await tx.get(ref);
+      if(!snap.exists)return;
+      const orderData=snap.data();
+      tx.set(controlRef,{lastCompleted:{...orderData,orderId:ref.id,completedAt:firebase.firestore.FieldValue.serverTimestamp()},updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+      tx.delete(ref);
+    });
+  }catch(e){console.error(e);alert("提供完了の処理に失敗しました。\\n"+e.message);}
+}
+async function undoKitchenCompletion(){
+  const controlRef=db.collection("orderSystem").doc("control");
+  try{
+    await authReady;
+    await db.runTransaction(async tx=>{
+      const controlSnap=await tx.get(controlRef);
+      const last=controlSnap.exists?controlSnap.data().lastCompleted:null;
+      if(!last||!last.number)throw new Error("UNDO_NOT_AVAILABLE");
+      const number=Number(last.number);
+      const activeRef=db.collection("orders").doc(ticketDocId(number));
+      const activeSnap=await tx.get(activeRef);
+      if(activeSnap.exists)throw new Error("TICKET_ALREADY_USED");
+      const restored={...last};
+      delete restored.orderId;
+      delete restored.completedAt;
+      tx.set(activeRef,restored);
+      tx.set(controlRef,{lastCompleted:firebase.firestore.FieldValue.delete(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+    });
+  }catch(e){
+    console.error(e);
+    if(e.message==="UNDO_NOT_AVAILABLE")alert("戻せる提供完了履歴がありません。");
+    else if(e.message==="TICKET_ALREADY_USED")alert("その番号はすでに別の注文で使用中のため、復元できません。番号の状況を確認してください。");
+    else alert("注文を戻せませんでした。\\n"+e.message);
+  }
 }
 function startOrderListeners(){
   if(orderListenersStarted)return;orderListenersStarted=true;
@@ -1794,7 +1863,10 @@ function startOrderListeners(){
       const status=document.getElementById("orderConnection");if(status)status.textContent="厨房とリアルタイム同期中";
     },e=>{console.error(e);const status=document.getElementById("orderConnection");if(status)status.textContent="注文データの接続エラー";});
     const controlUnsub=db.collection("orderSystem").doc("control").onSnapshot(snap=>{
-      orderNextNumber=Number(snap.exists?snap.data().nextNumber:1);if(!Number.isInteger(orderNextNumber)||orderNextNumber<1||orderNextNumber>16)orderNextNumber=1;renderReception();
+      const controlData=snap.exists?snap.data():{};
+      orderNextNumber=Number(controlData.nextNumber||1);if(!Number.isInteger(orderNextNumber)||orderNextNumber<1||orderNextNumber>16)orderNextNumber=1;
+      const undoButton=document.getElementById("undoKitchenButton");if(undoButton)undoButton.disabled=!(controlData.lastCompleted&&controlData.lastCompleted.number);
+      renderReception();
     },e=>console.error(e));
     orderListenerUnsubs=[ordersUnsub,controlUnsub];
   }).catch(e=>{console.error(e);const status=document.getElementById("orderConnection");if(status)status.textContent="認証エラー";});
