@@ -514,7 +514,13 @@ th{background:#eef1f4;color:#1a1a1a;font-weight:700;}
 .order-page-heading h2{margin:0 0 5px}
 .order-connection{font-size:14px;color:#52606d;background:#f1f5f7;border-radius:10px;padding:10px 14px;white-space:nowrap}
 .next-ticket-panel{background:#f3f7fa;border:2px solid #d8e3ea;border-radius:18px;padding:18px;text-align:center;margin:0 auto 18px;max-width:650px}
-.next-ticket-label{font-size:20px;font-weight:700;color:#53616b}.next-ticket-number{font-size:clamp(64px,10vw,100px);line-height:1.05;font-weight:800;color:#173f5f;font-variant-numeric:tabular-nums}.next-ticket-note{font-size:15px;color:#65727d;margin-top:5px}
+.next-ticket-label{font-size:20px;font-weight:700;color:#53616b}
+.ticket-number-select{display:block;margin:10px auto 0;width:min(100%,320px);height:76px;border:2px solid #9aabb8;border-radius:14px;background:#fff;color:#173f5f;font-size:48px;font-weight:900;text-align:center;text-align-last:center}
+.order-note-wrap{max-width:850px;margin:16px auto 0;background:#fff;border:1px solid #d9e0e5;border-radius:14px;padding:14px 18px}
+.order-note-wrap label{display:block;font-size:19px;font-weight:800;margin-bottom:8px;color:#273744}
+.order-note-wrap textarea{display:block;width:100%;min-height:78px;resize:vertical;border:1px solid #b9c6cf;border-radius:10px;padding:12px;font:inherit;font-size:18px}
+.kitchen-order-note{background:#fff8e8;border:1px solid #f0d9a8;border-radius:10px;padding:10px 12px;font-size:17px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.next-ticket-number{font-size:clamp(64px,10vw,100px);line-height:1.05;font-weight:800;color:#173f5f;font-variant-numeric:tabular-nums}.next-ticket-note{font-size:15px;color:#65727d;margin-top:5px}
 .order-entry-list{max-width:850px;margin:0 auto;background:#fff;border:1px solid #d9e0e5;border-radius:18px;overflow:hidden}
 .order-entry-row{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 24px;border-bottom:1px solid #e5eaee;min-height:100px;box-sizing:border-box}
 .order-entry-row:last-child{border-bottom:0}.order-product-name{font-size:clamp(24px,3vw,34px);font-weight:800;color:#273744}
@@ -641,11 +647,19 @@ th{background:#eef1f4;color:#1a1a1a;font-weight:700;}
 
 <section id="reception" class="page order-page">
   <div class="order-page-heading"><div><h2>受付・注文入力</h2><p class="hint">商品数を入力して「注文する」を押してください。</p></div><div class="order-connection" id="orderConnection">厨房と同期中…</div></div>
-  <div class="next-ticket-panel"><div class="next-ticket-label">次の番号札</div><div class="next-ticket-number" id="nextTicketNumber">1</div><div class="next-ticket-note" id="nextTicketNote">1〜14を順番に使用します</div></div>
+  <div class="next-ticket-panel">
+    <div class="next-ticket-label">注文番号（任意に選択）</div>
+    <select id="ticketNumberSelect" class="ticket-number-select" aria-label="注文番号を選択" onchange="renderReception()"></select>
+    <div class="next-ticket-note" id="nextTicketNote">通常は次の番号が自動選択されます。必要に応じて変更できます。</div>
+  </div>
   <div class="order-entry-list">
     <div class="order-entry-row"><div class="order-product-name">ソース</div><div class="order-stepper"><button type="button" class="order-step" onclick="changeOrderQty('source',-1)" aria-label="ソースを1個減らす">−</button><output id="qty-source">0</output><button type="button" class="order-step plus" onclick="changeOrderQty('source',1)" aria-label="ソースを1個増やす">＋</button></div></div>
     <div class="order-entry-row"><div class="order-product-name">明太</div><div class="order-stepper"><button type="button" class="order-step" onclick="changeOrderQty('mentai',-1)" aria-label="明太を1個減らす">−</button><output id="qty-mentai">0</output><button type="button" class="order-step plus" onclick="changeOrderQty('mentai',1)" aria-label="明太を1個増やす">＋</button></div></div>
     <div class="order-entry-row"><div class="order-product-name">おろし</div><div class="order-stepper"><button type="button" class="order-step" onclick="changeOrderQty('oroshi',-1)" aria-label="おろしを1個減らす">−</button><output id="qty-oroshi">0</output><button type="button" class="order-step plus" onclick="changeOrderQty('oroshi',1)" aria-label="おろしを1個増やす">＋</button></div></div>
+  </div>
+  <div class="order-note-wrap">
+    <label for="orderNote">備考（任意）</label>
+    <textarea id="orderNote" rows="3" maxlength="200" placeholder="例：ソース別添え、急ぎ など"></textarea>
   </div>
   <div class="order-entry-footer"><div class="order-total-label">注文合計 <strong id="orderTotalQty">0個</strong></div><button type="button" id="submitOrderButton" class="submit-order-button" onclick="submitKitchenOrder()" disabled>注文する</button></div>
   <div class="used-ticket-strip"><strong>使用中の番号：</strong><span id="usedTicketNumbers">まだありません</span></div>
@@ -655,7 +669,7 @@ th{background:#eef1f4;color:#1a1a1a;font-weight:700;}
 <section id="kitchen" class="page order-page">
   <div class="order-page-heading"><div><h2>厨房・注文一覧</h2><p class="hint">受付から届いた注文を番号札ごとに表示します。</p></div><div class="kitchen-wait-count"><span id="kitchenWaitCount">0</span><small>件待ち</small></div></div>
   <div id="kitchenOrders" class="kitchen-orders"><div class="kitchen-empty">現在、待っている注文はありません。</div></div>
-  <div class="kitchen-footer-note">商品をお客さんに渡したら「提供完了」を押してください。番号は1〜14を一巡してから再利用されます。</div>
+  <div class="kitchen-footer-note">商品をお客さんに渡したら「提供完了」を押してください。番号は1〜16を一巡してから再利用されます。</div>
 </section>
 
 <section id="members" class="page">
@@ -1648,7 +1662,7 @@ function exportShiftPng(){
 }
 
 // ===== 注文管理（既存 app/state とは独立した orders コレクション） =====
-const ORDER_TICKETS=Array.from({length:14},(_,i)=>i+1);
+const ORDER_TICKETS=Array.from({length:16},(_,i)=>i+1);
 const orderQty={source:0,mentai:0,oroshi:0};
 let liveOrders=[];
 let orderNextNumber=1;
@@ -1661,8 +1675,8 @@ function changeOrderQty(key,delta){
 }
 function getNextTicketPreview(){
   const occupied=new Set(liveOrders.map(o=>Number(o.number)));
-  for(let i=0;i<14;i++){
-    const n=((orderNextNumber-1+i)%14)+1;
+  for(let i=0;i<16;i++){
+    const n=((orderNextNumber-1+i)%16)+1;
     if(!occupied.has(n))return n;
   }
   return null;
@@ -1672,9 +1686,27 @@ function renderReception(){
   const total=orderQty.source+orderQty.mentai+orderQty.oroshi;
   const totalEl=document.getElementById("orderTotalQty");if(totalEl)totalEl.textContent=total+"個";
   const next=getNextTicketPreview();
-  const numberEl=document.getElementById("nextTicketNumber");if(numberEl)numberEl.textContent=next===null?"満席":String(next).padStart(2,"0");
-  const note=document.getElementById("nextTicketNote");if(note)note.textContent=next===null?"14枚すべて使用中です。提供完了をお待ちください。":"1〜14を順番に使用します";
-  const btn=document.getElementById("submitOrderButton");if(btn)btn.disabled=total===0||next===null;
+  const select=document.getElementById("ticketNumberSelect");
+  if(select){
+    const current=Number(select.value);
+    if(!select.options.length){
+      select.innerHTML=ORDER_TICKETS.map(n=>`<option value="${n}">${String(n).padStart(2,"0")}</option>`).join("");
+      select.value="";
+    }
+    const occupied=new Set(liveOrders.map(o=>Number(o.number)));
+    [...select.options].forEach(opt=>{
+      const n=Number(opt.value);
+      opt.disabled=occupied.has(n);
+      opt.textContent=String(n).padStart(2,"0")+(occupied.has(n)?"（使用中）":"");
+    });
+    const preferred=(current>=1&&current<=16&&!occupied.has(current))?current:next;
+    if(preferred!==null)select.value=String(preferred);
+    else select.value="";
+  }
+  const selected=select&&select.value?Number(select.value):null;
+  const numberEl=document.getElementById("nextTicketNumber");if(numberEl)numberEl.textContent=selected===null?"満席":String(selected).padStart(2,"0");
+  const note=document.getElementById("nextTicketNote");if(note)note.textContent=next===null?"番号札1〜16がすべて使用中です。提供完了をお待ちください。":"番号は任意に選べます。通常の次番号は "+String(next).padStart(2,"0")+" です。";
+  const btn=document.getElementById("submitOrderButton");if(btn)btn.disabled=total===0||selected===null;
   const used=document.getElementById("usedTicketNumbers");if(used){const nums=liveOrders.map(o=>Number(o.number)).sort((a,b)=>a-b);used.textContent=nums.length?nums.map(n=>String(n).padStart(2,"0")).join("・"):"まだありません";}
 }
 function renderKitchenOrders(){
@@ -1682,7 +1714,15 @@ function renderKitchenOrders(){
   const count=document.getElementById("kitchenWaitCount");if(count)count.textContent=liveOrders.length;
   root.innerHTML="";
   if(!liveOrders.length){root.innerHTML='<div class="kitchen-empty">現在、待っている注文はありません。</div>';return;}
-  const sorted=[...liveOrders].sort((a,b)=>Number(a.number)-Number(b.number));
+  // 注文した順番で表示。番号が16から1に戻っても、新しい1番は16番の下に並ぶ。
+  const sorted=[...liveOrders].sort((a,b)=>{
+    const ia=Number(a.orderIndex),ib=Number(b.orderIndex);
+    if(Number.isFinite(ia)&&Number.isFinite(ib)&&ia!==ib)return ia-ib;
+    const ta=a.createdAt&&a.createdAt.toMillis?a.createdAt.toMillis():0;
+    const tb=b.createdAt&&b.createdAt.toMillis?b.createdAt.toMillis():0;
+    if(ta!==tb)return ta-tb;
+    return String(a.id||"").localeCompare(String(b.id||""));
+  });
   sorted.forEach(order=>{
     const card=document.createElement("article");card.className="kitchen-order-card";
     const top=document.createElement("div");top.className="kitchen-order-top";
@@ -1693,6 +1733,11 @@ function renderKitchenOrders(){
     [["ソース",order.source],["明太",order.mentai],["おろし",order.oroshi]].forEach(([name,value])=>{if(Number(value)>0){const label=document.createElement("span");label.textContent=name;const qty=document.createElement("strong");qty.textContent=Number(value)+"個";items.append(label,qty);}});
     card.appendChild(items);
     const total=document.createElement("div");total.className="kitchen-order-total";total.textContent="合計 "+(Number(order.source||0)+Number(order.mentai||0)+Number(order.oroshi||0))+"個";card.appendChild(total);
+    if(order.note&&String(order.note).trim()){
+      const note=document.createElement("div");note.className="kitchen-order-note";
+      const label=document.createElement("strong");label.textContent="備考：";
+      note.appendChild(label);note.appendChild(document.createTextNode(" "+String(order.note).trim()));card.appendChild(note);
+    }
     const done=document.createElement("button");done.type="button";done.className="kitchen-complete-button";done.textContent="提供完了";done.onclick=()=>completeKitchenOrder(order.number);card.appendChild(done);
     root.appendChild(card);
   });
@@ -1700,28 +1745,38 @@ function renderKitchenOrders(){
 async function submitKitchenOrder(){
   const total=orderQty.source+orderQty.mentai+orderQty.oroshi;
   if(!total){alert("商品数を1個以上入力してください。");return;}
+  const select=document.getElementById("ticketNumberSelect");
+  const chosenNumber=select?Number(select.value):null;
+  if(!Number.isInteger(chosenNumber)||chosenNumber<1||chosenNumber>16){alert("番号札を選択してください。");return;}
+  const noteEl=document.getElementById("orderNote");
+  const note=noteEl?String(noteEl.value||"").trim():"";
   const btn=document.getElementById("submitOrderButton");if(btn){btn.disabled=true;btn.textContent="送信中…";}
   try{
     await authReady;
     const controlRef=db.collection("orderSystem").doc("control");
-    const refs=ORDER_TICKETS.map(n=>db.collection("orders").doc(ticketDocId(n)));
+    const ref=db.collection("orders").doc(ticketDocId(chosenNumber));
     const quantities={source:orderQty.source,mentai:orderQty.mentai,oroshi:orderQty.oroshi};
     const assigned=await db.runTransaction(async tx=>{
+      const snap=await tx.get(ref);
+      if(snap.exists)throw new Error("TICKET_OCCUPIED");
       const controlSnap=await tx.get(controlRef);
-      const snaps=[];for(const ref of refs)snaps.push(await tx.get(ref));
-      const occupied=new Set();snaps.forEach((snap,i)=>{if(snap.exists)occupied.add(i+1);});
-      let pointer=Number(controlSnap.exists?controlSnap.data().nextNumber:1);if(!Number.isInteger(pointer)||pointer<1||pointer>14)pointer=1;
-      let chosen=null;
-      for(let i=0;i<14;i++){const n=((pointer-1+i)%14)+1;if(!occupied.has(n)){chosen=n;break;}}
-      if(chosen===null)throw new Error("TICKETS_FULL");
-      tx.set(refs[chosen-1],{number:chosen,source:quantities.source,mentai:quantities.mentai,oroshi:quantities.oroshi,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-      tx.set(controlRef,{nextNumber:chosen===14?1:chosen+1,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
-      return chosen;
+      const controlData=controlSnap.exists?controlSnap.data():{};
+      const pointer=chosenNumber===16?1:chosenNumber+1;
+      const orderIndex=Number.isFinite(Number(controlData.nextOrderIndex))?Number(controlData.nextOrderIndex):1;
+      tx.set(ref,{number:chosenNumber,source:quantities.source,mentai:quantities.mentai,oroshi:quantities.oroshi,...(note?{note}:{}),orderIndex,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+      tx.set(controlRef,{nextNumber:pointer,nextOrderIndex:orderIndex+1,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+      return chosenNumber;
     });
-    orderQty.source=0;orderQty.mentai=0;orderQty.oroshi=0;renderReception();
+    orderQty.source=0;orderQty.mentai=0;orderQty.oroshi=0;
+    if(noteEl)noteEl.value="";
+    if(select)select.value="";
+    renderReception();
     const status=document.getElementById("receptionStatus");if(status)status.textContent="番号 "+String(assigned).padStart(2,"0")+" の注文を厨房に送りました。";
-  }catch(e){console.error(e);const status=document.getElementById("receptionStatus");if(status)status.textContent=e.message==="TICKETS_FULL"?"番号札1〜14がすべて使用中です。提供完了をお待ちください。":"注文を送信できませんでした。通信・Firestoreルールを確認してください。";}
-  finally{if(btn){btn.textContent="注文する";renderReception();}}
+  }catch(e){
+    console.error(e);
+    const status=document.getElementById("receptionStatus");
+    if(status)status.textContent=e.message==="TICKET_OCCUPIED"?"その番号は使用中です。別の番号を選んでください。":e.message==="TICKETS_FULL"?"番号札1〜16がすべて使用中です。提供完了をお待ちください。":"注文を送信できませんでした。通信・Firestoreルールを確認してください。";
+  }finally{if(btn){btn.textContent="注文する";renderReception();}}
 }
 async function completeKitchenOrder(number){
   try{
@@ -1739,7 +1794,7 @@ function startOrderListeners(){
       const status=document.getElementById("orderConnection");if(status)status.textContent="厨房とリアルタイム同期中";
     },e=>{console.error(e);const status=document.getElementById("orderConnection");if(status)status.textContent="注文データの接続エラー";});
     const controlUnsub=db.collection("orderSystem").doc("control").onSnapshot(snap=>{
-      orderNextNumber=Number(snap.exists?snap.data().nextNumber:1);if(!Number.isInteger(orderNextNumber)||orderNextNumber<1||orderNextNumber>14)orderNextNumber=1;renderReception();
+      orderNextNumber=Number(snap.exists?snap.data().nextNumber:1);if(!Number.isInteger(orderNextNumber)||orderNextNumber<1||orderNextNumber>16)orderNextNumber=1;renderReception();
     },e=>console.error(e));
     orderListenerUnsubs=[ordersUnsub,controlUnsub];
   }).catch(e=>{console.error(e);const status=document.getElementById("orderConnection");if(status)status.textContent="認証エラー";});
